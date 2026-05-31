@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pack It</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--pink:#D4537E;--pink-lt:#FBEAF0;--pink-dk:#993556;
+--teal:#1D9E75;--teal-lt:#E1F5EE;--teal-dk:#085041;
+--amber:#BA7517;--amber-lt:#FAEEDA;
+--bg:#FAFAF9;--bg2:#F3F2EF;--bg3:#ffffff;
+--text:#1a1a18;--text2:#5F5E5A;--text3:#888780;
+--bdr:rgba(0,0,0,0.12);--bdr2:rgba(0,0,0,0.2);
+--r:8px;--rl:12px;
+--font:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+--bg:#1C1C1A;--bg2:#242422;--bg3:#2C2C2A;
+--text:#F1EFE8;--text2:#B4B2A9;--text3:#888780;
+--bdr:rgba(255,255,255,0.12);--bdr2:rgba(255,255,255,0.22);
+--pink:#ED93B1;--pink-lt:rgba(212,83,126,0.18);--pink-dk:#F4C0D1;
+--teal-lt:rgba(29,158,117,0.18);--teal-dk:#9FE1CB;
+--amber-lt:rgba(186,117,23,0.18);
+}}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+.topbar{background:var(--bg3);border-bottom:1px solid var(--bdr);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:20px;font-weight:700}
+.topbar h1 span{color:var(--pink)}
+.trip-pill{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--pink-lt);color:var(--pink-dk);font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.content{max-width:600px;margin:0 auto;padding:14px 12px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg3);border-top:1px solid var(--bdr);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:none;cursor:pointer;padding:10px 4px 8px;font-family:var(--font);font-size:11px;font-weight:500;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:4px;transition:color 0.15s}
+.nav button.on{color:var(--pink)}
+.nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.view{display:none}.view.on{display:block}
+.setup-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.setup-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.setup-sub{font-size:13px;color:var(--text3);margin-bottom:16px}
+.trip-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tt-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;transition:all 0.15s;user-select:none}
+.tt-btn.on{background:var(--pink-lt);border-color:var(--pink);color:var(--pink-dk)}
+.tt-icon{font-size:16px}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:12px;color:var(--text3);display:block;margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.field input,.field textarea{width:100%;font-family:var(--font);font-size:14px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--bg3);color:var(--text);outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--pink)}
+.field textarea{resize:none;line-height:1.5}
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.build-btn{width:100%;padding:13px;border-radius:var(--r);background:var(--pink);border:none;color:#fff;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+.build-btn:active{opacity:0.9}
+.prog-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rl);padding:14px 16px;margin-bottom:12px}
+.prog-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.prog-name{font-size:15px;font-weight:600;color:var(--text)}
+.prog-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.prog-pct{font-size:26px;font-weight:700;color:var(--pink)}
+.bar-track{height:10px;background:var(--bg2);border-radius:5px;overflow:hidden;margin-bottom:10px}
+.bar-fill{height:100%;background:var(--pink);border-radius:5px;transition:width 0.3s ease;width:0%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--bg2);border-radius:var(--r);padding:8px;text-align:center}
+.stat-n{font-size:20px;font-weight:700;color:var(--text)}
+.stat-l{font-size:11px;color:var(--text3);margin-top:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.chips::-webkit-scrollbar{display:none}
+.chip{background:var(--bg3);border:1px solid var(--bdr2);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;cursor:pointer;font-family:var(--font);flex-shrink:0}
+.chip.on{background:var(--pink-lt);border-color:var(--pink);color:var(--pink-dk)}
+.sec{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}
+.sec.consider{border-color:var(--amber)}
+.sec-hd{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--bg2);-webkit-tap-highlight-color:transparent}
+.sec-hd:active{opacity:0.8}
+.sec.consider .sec-hd{background:var(--amber-lt)}
+.sec-icon{font-size:20px;flex-shrink:0;width:24px;text-align:center}
+.sec-title{font-size:15px;font-weight:600;color:var(--text);flex:1}
+.sec-badge{font-size:12px;color:var(--text3);font-weight:600}
+.sec-badge.done{color:var(--teal)}
+.sec-all-btn{font-size:12px;color:var(--pink);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:500;padding:0 4px;flex-shrink:0}
+.sec-chev{font-size:18px;color:var(--text3);transition:transform 0.2s;flex-shrink:0;line-height:1}
+.sec-chev.open{transform:rotate(180deg)}
+.sec-body{display:none;border-top:1px solid var(--bdr)}.sec-body.open{display:block}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);min-height:48px;-webkit-tap-highlight-color:transparent}
+.item:last-child{border-bottom:none}
+.item:active{background:var(--bg2)}
+.cb{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:#fff;transition:all 0.15s}
+.cb.on{background:var(--pink);border-color:var(--pink)}
+.item-lbl{font-size:14px;color:var(--text);flex:1;line-height:1.3}
+.item-lbl.on{color:var(--text3);text-decoration:line-through}
+.item-note{font-size:11px;color:var(--text3);display:block;margin-top:2px}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;font-family:var(--font);font-size:14px;padding:10px 12px 10px 36px;border-radius:var(--rl);border:1px solid var(--bdr2);background:var(--bg3);color:var(--text);outline:none}
+.search-wrap input:focus{border-color:var(--pink)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3);pointer-events:none}
+.search-results{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;display:none}
+.sr-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;font-size:14px}
+.sr-item:last-child{border-bottom:none}
+.sr-item:active{background:var(--bg2)}
+.add-tag{font-size:12px;color:var(--pink);font-weight:500}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rl);padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px}
+.btn{width:100%;padding:12px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--bg3);color:var(--text);font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;margin-top:8px}
+.btn-pink{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn:active{opacity:0.8}
+.mtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.mtab{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--text3);cursor:pointer;font-family:var(--font);font-weight:500}
+.mtab.on{background:var(--pink-lt);border-color:var(--pink);color:var(--pink-dk)}
+.method-desc{background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6;border:1px solid var(--bdr)}
+.mix-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.ms{background:var(--bg2);border-radius:var(--r);padding:8px;text-align:center;border:1px solid var(--bdr)}
+.ms-n{font-size:16px;font-weight:700;color:var(--pink)}
+.ms-l{font-size:10px;color:var(--text3);margin-top:2px}
+.cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cap-slot{background:var(--bg2);border-radius:var(--rl);border:1px solid var(--bdr);padding:12px}
+.cap-slot.wide{grid-column:1/-1}
+.cap-slot-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.cap-count{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--text3)}
+.cap-count.ok{background:var(--teal-lt);color:var(--teal-dk)}
+.cap-items{display:flex;flex-direction:column;gap:6px}
+.cap-row{display:flex;gap:6px;align-items:center}
+.cap-row input{flex:1;font-family:var(--font);font-size:13px;padding:7px 9px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--bg3);color:var(--text);outline:none}
+.cap-row input:focus{border-color:var(--pink)}
+.cap-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;padding:0 3px;flex-shrink:0}
+.cap-add{font-size:12px;color:var(--pink);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:500;padding:6px 0 0;display:block}
+.combos{background:var(--bg2);border-radius:var(--rl);border:1px solid var(--bdr);padding:12px;margin-bottom:12px}
+.combos-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px}
+.combo-row{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px;flex-wrap:wrap}
+.combo-row:last-child{border-bottom:none}
+.combo-lk{font-size:11px;font-weight:700;color:var(--pink-dk);background:var(--pink-lt);padding:2px 8px;border-radius:6px;flex-shrink:0}
+.orow{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.orow:last-child{border-bottom:none}
+.oday{background:var(--pink-lt);color:var(--pink-dk);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;min-width:56px;text-align:center;margin-top:2px}
+.oinfo{flex:1;min-width:0}
+.odesc{font-size:14px;color:var(--text)}
+.oshoe{font-size:12px;color:var(--text3);margin-top:3px}
+.odel{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;padding:0 4px;line-height:1;flex-shrink:0}
+.add-form{background:var(--bg2);border-radius:var(--rl);padding:14px;margin-top:10px}
+.add-form-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.inp{width:100%;font-family:var(--font);font-size:14px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--bg3);color:var(--text);outline:none;margin-bottom:8px;display:block}
+.inp:focus{border-color:var(--pink)}
+.dayof-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bdr);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dayof-item:last-child{border-bottom:none}
+.tip-block{border-radius:var(--rl);padding:14px 16px;margin-bottom:12px;border:1px solid}
+.tip-teal{background:var(--teal-lt);border-color:rgba(29,158,117,0.3)}
+.tip-amber{background:var(--amber-lt);border-color:rgba(186,117,23,0.3)}
+@media(prefers-color-scheme:dark){
+.tip-teal{background:rgba(29,158,117,0.15)}
+.tip-amber{background:rgba(186,117,23,0.15)}
+}
+.tip-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.tip-teal .tip-title{color:var(--teal-dk)}
+.tip-amber .tip-title{color:var(--amber)}
+.tip-item{display:flex;gap:10px;padding:5px 0;font-size:14px;align-items:flex-start}
+.tip-teal .tip-item{color:var(--teal-dk)}
+.tip-amber .tip-item{color:var(--amber)}
+@media(prefers-color-scheme:dark){
+.tip-teal .tip-item,.tip-teal .tip-title{color:var(--teal-dk)}
+.tip-amber .tip-item,.tip-amber .tip-title{color:#FAC775}
+}
+.tip-dot{width:18px;height:18px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:11px;font-weight:700}
+.tip-teal .tip-dot{background:var(--teal)}
+.tip-amber .tip-dot{background:var(--amber)}
+.empty{text-align:center;padding:24px;color:var(--text3);font-size:14px}
+.notice{background:var(--amber-lt);border:1px solid rgba(186,117,23,0.4);border-radius:var(--r);padding:10px 12px;font-size:13px;color:#633806;margin-bottom:12px}
+@media(prefers-color-scheme:dark){.notice{background:rgba(186,117,23,0.15);color:#FAC775}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Pack <span>It</span></h1>
+  <div class="trip-pill" id="top-pill">New trip</div>
+</div>
+
+<div class="content">
+
+  <div class="view on" id="view-checklist">
+    <div id="setup-panel">
+      <div class="setup-card">
+        <div class="setup-title">What kind of trip is this?</div>
+        <div class="setup-sub">Select all that apply — your list builds automatically</div>
+        <div class="trip-types">
+          <button class="tt-btn on" data-type="always"><span class="tt-icon">📋</span> Always</button>
+          <button class="tt-btn" data-type="flight" onclick="toggleType(this)"><span class="tt-icon">✈️</span> Flying</button>
+          <button class="tt-btn" data-type="warm" onclick="toggleType(this)"><span class="tt-icon">☀️</span> Warm weather</button>
+          <button class="tt-btn" data-type="cold" onclick="toggleType(this)"><span class="tt-icon">🧥</span> Cold weather</button>
+          <button class="tt-btn" data-type="optional" onclick="toggleType(this)"><span class="tt-icon">❓</span> Also consider</button>
+        </div>
+        <div class="col2">
+          <div class="field"><label>Destination</label><input type="text" id="t-dest" placeholder="Fort Worth" oninput="saveTrip()"></div>
+          <div class="field"><label>Occasion</label><input type="text" id="t-occ" placeholder="Easter, Christmas" oninput="saveTrip()"></div>
+        </div>
+        <div class="col2">
+          <div class="field"><label>Nights</label><input type="number" id="t-nights" placeholder="5" min="1" oninput="saveTrip()"></div>
+          <div class="field"><label>Weather</label><input type="text" id="t-weather" placeholder="54-80 dry" oninput="saveTrip()"></div>
+        </div>
+        <div class="field"><label>Colors / vibe</label><input type="text" id="t-colors" placeholder="Black, tan, pink" oninput="saveTrip()"></div>
+        <button class="build-btn" onclick="buildList()">Build my packing list</button>
+      </div>
+    </div>
+
+    <div id="list-panel" style="display:none">
+      <div class="prog-card">
+        <div class="prog-top">
+          <div>
+            <div class="prog-name" id="pg-name">New trip</div>
+            <div class="prog-meta" id="pg-meta"></div>
+          </div>
+          <div class="prog-pct" id="pg-pct">0%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="pg-bar"></div></div>
+        <div class="stats">
+          <div class="stat"><div class="stat-n" id="s-done">0</div><div class="stat-l">Packed</div></div>
+          <div class="stat"><div class="stat-n" id="s-left">0</div><div class="stat-l">Remaining</div></div>
+          <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Total</div></div>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search to add a missing item…" oninput="handleSearch(this.value)">
+      </div>
+      <div class="search-results" id="search-results"></div>
+      <div class="chips">
+        <button class="chip" onclick="checkAll()">Check all</button>
+        <button class="chip" onclick="clearAll()">Uncheck all</button>
+        <button class="chip" id="filter-chip" onclick="toggleFilter()">Show unpacked only</button>
+        <button class="chip" onclick="resetToSetup()">Change trip</button>
+      </div>
+      <div id="sections"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-outfits">
+    <div class="mtabs">
+      <button class="mtab on" id="mt-capsule" onclick="showMethod('capsule')">Capsule planner</button>
+      <button class="mtab" id="mt-daily" onclick="showMethod('daily')">Day-by-day</button>
+    </div>
+    <div id="method-capsule">
+      <div class="method-desc">Pick a formula. Fill in your pieces. Every item should mix and match with at least 2 others — perfect for carry-on only.</div>
+      <div class="mtabs">
+        <button class="mtab on" id="mf-43221" onclick="showFormula('43221')">4-3-2-2-1</button>
+        <button class="mtab" id="mf-5332" onclick="showFormula('5332')">5-3-3-2</button>
+        <button class="mtab" id="mf-custom" onclick="showFormula('custom')">Custom</button>
+      </div>
+      <div class="method-desc" id="formula-desc"></div>
+      <div class="mix-stats">
+        <div class="ms"><div class="ms-n" id="mx-looks">0</div><div class="ms-l">Mix looks</div></div>
+        <div class="ms"><div class="ms-n" id="mx-tops">0</div><div class="ms-l">Tops</div></div>
+        <div class="ms"><div class="ms-n" id="mx-bots">0</div><div class="ms-l">Bottoms</div></div>
+        <div class="ms"><div class="ms-n" id="mx-shoes">0</div><div class="ms-l">Shoes</div></div>
+      </div>
+      <div class="cap-grid" id="cap-grid"></div>
+      <div class="combos" id="combos" style="display:none">
+        <div class="combos-title">Possible outfit combinations</div>
+        <div id="combos-list"></div>
+      </div>
+    </div>
+    <div id="method-daily" style="display:none">
+      <div class="card">
+        <div class="card-title">Day-by-day outfits</div>
+        <div id="outfit-list"></div>
+      </div>
+      <div class="add-form">
+        <div class="add-form-title">Add outfit</div>
+        <div class="col2" style="margin-bottom:8px">
+          <div><label style="font-size:12px;color:var(--text3);display:block;margin-bottom:4px">Day</label><input class="inp" style="margin-bottom:0" type="text" id="o-day" placeholder="Travel / Day 1"></div>
+          <div><label style="font-size:12px;color:var(--text3);display:block;margin-bottom:4px">Shoes</label><input class="inp" style="margin-bottom:0" type="text" id="o-shoes" placeholder="Birkenstocks"></div>
+        </div>
+        <label style="font-size:12px;color:var(--text3);display:block;margin-bottom:4px;margin-top:8px">Outfit</label>
+        <input class="inp" type="text" id="o-fit" placeholder="Black midi dress, cardigan">
+        <label style="font-size:12px;color:var(--text3);display:block;margin-bottom:4px">Notes / accessories</label>
+        <input class="inp" type="text" id="o-notes" placeholder="Belt bag, gold jewelry">
+        <button class="btn btn-pink" onclick="addOutfit()">Add outfit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-trip">
+    <div class="card">
+      <div class="card-title">Day-of checklist</div>
+      <div id="dayof"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Trip notes</div>
+      <div class="field" style="margin-bottom:0"><textarea rows="4" id="t-notes" placeholder="Reminders, last-minute items…" oninput="saveTrip()"></textarea></div>
+    </div>
+    <button class="btn btn-pink" onclick="resetToSetup()" style="margin-top:4px">Start a new trip</button>
+    <button class="btn" onclick="refreshSheet()" style="margin-top:8px">🔄 Refresh from Google Sheet</button>
+    <div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:var(--r);font-size:12px;color:var(--text3);line-height:1.7">
+      <strong style="color:var(--text2);display:block;margin-bottom:4px">To enable live Google Sheet sync:</strong>
+      In Google Sheets → File → Share → Publish to web → choose CSV → click Publish. Then paste the new URL by updating SHEET_URL in this file.
+    </div>
+  </div>
+
+  <div class="view" id="view-tips">
+    <div class="tip-block tip-teal">
+      <div class="tip-title">Carry-on only rules</div>
+      <div class="tip-item"><div class="tip-dot">1</div><span>CPAP in personal item — never checked. Remove at TSA for separate screening.</span></div>
+      <div class="tip-item"><div class="tip-dot">2</div><span>Liquids: 3.4oz each, 1 quart bag, accessible at top for TSA.</span></div>
+      <div class="tip-item"><div class="tip-dot">3</div><span>Wear heaviest shoes and thickest layer on travel day to save bag space.</span></div>
+      <div class="tip-item"><div class="tip-dot">4</div><span>Roll clothes — shapewear, PJs, lounge — saves 30-40% more space than folding.</span></div>
+      <div class="tip-item"><div class="tip-dot">5</div><span>Turkish towel = beach towel + blanket + coverup. One item, three jobs.</span></div>
+      <div class="tip-item"><div class="tip-dot">6</div><span>Compression socks on before boarding. Reduces swelling on long flights.</span></div>
+      <div class="tip-item"><div class="tip-dot">7</div><span>Board early. Overhead bin fills fast. Priority boarding is worth it.</span></div>
+      <div class="tip-item"><div class="tip-dot">8</div><span>Limit to 3 pairs of shoes max: travel, casual, dress.</span></div>
+    </div>
+    <div class="tip-block tip-amber">
+      <div class="tip-title">CPAP travel must-haves</div>
+      <div class="tip-item"><div class="tip-dot">1</div><span>CPAP machine + power cord + mask + headgear</span></div>
+      <div class="tip-item"><div class="tip-dot">2</div><span>Distilled water (small bottle) or plan to buy at destination</span></div>
+      <div class="tip-item"><div class="tip-dot">3</div><span>Power strip — hotel outlets are never where you need them</span></div>
+      <div class="tip-item"><div class="tip-dot">4</div><span>Sleep cap + eye mask in same pouch as CPAP for easy hotel setup</span></div>
+      <div class="tip-item"><div class="tip-dot">5</div><span>Pack CPAP last so it comes out first at hotel</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mid-trip reminders</div>
+      <div style="font-size:14px;color:var(--text2);line-height:2">
+        <div>Refill toiletry bottles if staying 5+ nights</div>
+        <div>Charge all devices every night before bed</div>
+        <div>CPAP water — refill every 2-3 nights</div>
+        <div>Laundry mid-trip if 5+ nights (hotel sink or laundry bag)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<nav class="nav">
+  <button id="nav-checklist" class="on" onclick="showView('checklist')">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Checklist
+  </button>
+  <button id="nav-outfits" onclick="showView('outfits')">
+    <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg>Outfits
+  </button>
+  <button id="nav-trip" onclick="showView('trip')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Trip
+  </button>
+  <button id="nav-tips" onclick="showView('tips')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Tips
+  </button>
+</nav>
+
+<script>
+var SHEET_URL = "https://script.google.com/macros/s/AKfycbxCPX1klE0qM6YwIRh0uZszJvrAiE76o7IUMWX7PwcBYEwfV4CbsMWsNE5FKzJzjxQC7A/exec";
+
+var FALLBACK_ITEMS = [
+  {category:"Personal Bag",item:"Passport",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Wallet",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Pochette",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Portable charger",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Jewelry",note:"",types:["always"]},
+  {category:"Personal Bag",item:"AirPods",note:"",types:["always"]},
+  {category:"Personal Bag",item:"iPad",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Wipes",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Sunglasses",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Belt bag / essentials bag",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Water bottle",note:"",types:["always"]},
+  {category:"Personal Bag",item:"Scarf",note:"",types:["cold"]},
+  {category:"Personal Bag",item:"Headphones",note:"",types:["flight","optional"]},
+  {category:"In-Flight",item:"Tissues",note:"",types:["always"]},
+  {category:"In-Flight",item:"Hand sanitizer",note:"",types:["always"]},
+  {category:"In-Flight",item:"Wipes",note:"",types:["always"]},
+  {category:"In-Flight",item:"Mints / gum",note:"",types:["always"]},
+  {category:"In-Flight",item:"Wisps",note:"",types:["always"]},
+  {category:"In-Flight",item:"Lip balm",note:"",types:["always"]},
+  {category:"In-Flight",item:"Face cream",note:"",types:["flight","optional"]},
+  {category:"In-Flight",item:"Lotion",note:"",types:["always"]},
+  {category:"In-Flight",item:"Hair tie",note:"",types:["always"]},
+  {category:"In-Flight",item:"Pen",note:"",types:["always"]},
+  {category:"In-Flight",item:"Plastic bag",note:"",types:["always"]},
+  {category:"In-Flight",item:"Eye masks",note:"",types:["flight","optional"]},
+  {category:"In-Flight",item:"Facial spray",note:"",types:["flight","optional"]},
+  {category:"In-Flight",item:"Compression socks",note:"Put on before boarding",types:["flight","optional"]},
+  {category:"Clothes",item:"Panties",note:"",types:["always"]},
+  {category:"Clothes",item:"Bras / sleep bra",note:"",types:["always"]},
+  {category:"Clothes",item:"Workout / sports bra",note:"",types:["optional"]},
+  {category:"Clothes",item:"Pajamas",note:"",types:["always"]},
+  {category:"Clothes",item:"Tank undershirt",note:"",types:["always"]},
+  {category:"Clothes",item:"Shapewear / boy shorts",note:"",types:["optional"]},
+  {category:"Clothes",item:"Bike shorts with pockets",note:"",types:["optional"]},
+  {category:"Clothes",item:"Lounge outfit",note:"",types:["always"]},
+  {category:"Clothes",item:"Robe",note:"",types:["optional"]},
+  {category:"Clothes",item:"Swimsuit",note:"",types:["warm"]},
+  {category:"Clothes",item:"Swimsuit coverup",note:"",types:["warm"]},
+  {category:"Clothes",item:"Thick socks",note:"",types:["cold"]},
+  {category:"Shoes",item:"Walking shoes / sneakers",note:"",types:["always"]},
+  {category:"Shoes",item:"Walking sandal / Birkenstocks",note:"",types:["always"]},
+  {category:"Shoes",item:"Dressier shoe",note:"",types:["optional"]},
+  {category:"Shoes",item:"House slippers",note:"",types:["always"]},
+  {category:"Shoes",item:"Flip flops / pool shoes",note:"",types:["warm"]},
+  {category:"Toiletries",item:"Oil cleanser / micellar water",note:"",types:["always"]},
+  {category:"Toiletries",item:"Face wash",note:"",types:["always"]},
+  {category:"Toiletries",item:"Toner",note:"",types:["always"]},
+  {category:"Toiletries",item:"Serums & oils",note:"",types:["always"]},
+  {category:"Toiletries",item:"Eye cream",note:"",types:["always"]},
+  {category:"Toiletries",item:"Moisturizer",note:"",types:["always"]},
+  {category:"Toiletries",item:"SPF sunscreen",note:"Reapply daily",types:["always"]},
+  {category:"Toiletries",item:"Lip balm",note:"",types:["always"]},
+  {category:"Toiletries",item:"Face cloths",note:"",types:["always"]},
+  {category:"Toiletries",item:"Cotton pads",note:"",types:["always"]},
+  {category:"Toiletries",item:"Aquaphor",note:"",types:["always"]},
+  {category:"Toiletries",item:"Toothbrush",note:"",types:["always"]},
+  {category:"Toiletries",item:"Toothpaste",note:"",types:["always"]},
+  {category:"Toiletries",item:"Floss sticks",note:"",types:["always"]},
+  {category:"Toiletries",item:"Deodorant",note:"",types:["always"]},
+  {category:"Toiletries",item:"Body wash",note:"",types:["always"]},
+  {category:"Toiletries",item:"Lotion",note:"",types:["always"]},
+  {category:"Toiletries",item:"Powder",note:"",types:["always"]},
+  {category:"Toiletries",item:"Perfume",note:"",types:["always"]},
+  {category:"Toiletries",item:"Tweezers",note:"",types:["always"]},
+  {category:"Toiletries",item:"Razor",note:"",types:["always"]},
+  {category:"Toiletries",item:"Poo-pourri",note:"",types:["optional"]},
+  {category:"Toiletries",item:"Evian facial spray",note:"",types:["optional"]},
+  {category:"Toiletries",item:"Face wipes",note:"",types:["always"]},
+  {category:"Toiletries",item:"Washcloth",note:"",types:["optional"]},
+  {category:"Medical",item:"CPAP machine",note:"Remove at TSA for separate screening",types:["always"]},
+  {category:"Medical",item:"Prescriptions",note:"",types:["always"]},
+  {category:"Medical",item:"Tylenol",note:"",types:["always"]},
+  {category:"Medical",item:"Tums",note:"",types:["always"]},
+  {category:"Medical",item:"Cough meds",note:"",types:["always"]},
+  {category:"Medical",item:"Vicks",note:"",types:["always"]},
+  {category:"Medical",item:"Stomach meds",note:"",types:["always"]},
+  {category:"Medical",item:"Sleep meds",note:"",types:["always"]},
+  {category:"Medical",item:"Supplements",note:"",types:["always"]},
+  {category:"Medical",item:"Bandaids",note:"",types:["always"]},
+  {category:"Medical",item:"Saline spray",note:"",types:["always"]},
+  {category:"Medical",item:"Safety pins",note:"",types:["always"]},
+  {category:"Medical",item:"Allergy meds",note:"",types:["always"]},
+  {category:"Tech",item:"Power bank",note:"",types:["always"]},
+  {category:"Tech",item:"iPad charger",note:"",types:["always"]},
+  {category:"Tech",item:"Apple trio / dual charger",note:"",types:["always"]},
+  {category:"Tech",item:"Phone holder / stand",note:"",types:["always"]},
+  {category:"Tech",item:"AirPod cleaner",note:"",types:["always"]},
+  {category:"Tech",item:"Travel scissors",note:"",types:["optional"]},
+  {category:"Tech",item:"Sewing kit",note:"",types:["optional"]},
+  {category:"Makeup",item:"Tinted moisturizer",note:"",types:["always"]},
+  {category:"Makeup",item:"Concealer",note:"",types:["always"]},
+  {category:"Makeup",item:"Foundation",note:"",types:["always"]},
+  {category:"Makeup",item:"Powder",note:"",types:["always"]},
+  {category:"Makeup",item:"Blush / bronzer",note:"",types:["always"]},
+  {category:"Makeup",item:"Brows and eyeliner",note:"",types:["always"]},
+  {category:"Makeup",item:"Eyeshadows",note:"",types:["always"]},
+  {category:"Makeup",item:"Mascara",note:"",types:["always"]},
+  {category:"Makeup",item:"Lipstick neutral + liner",note:"",types:["always"]},
+  {category:"Makeup",item:"Lipstick color + liner",note:"",types:["always"]},
+  {category:"Makeup",item:"Setting spray",note:"",types:["always"]},
+  {category:"Makeup",item:"Primer",note:"",types:["optional"]},
+  {category:"Makeup",item:"Brushes and sponges",note:"",types:["always"]},
+  {category:"Makeup",item:"Mirror",note:"",types:["always"]},
+  {category:"Makeup",item:"Brush cleanser",note:"",types:["optional"]},
+  {category:"Hair",item:"Hair ties",note:"",types:["always"]},
+  {category:"Hair",item:"Shower cap",note:"",types:["always"]},
+  {category:"Hair",item:"Hair band",note:"",types:["optional"]},
+  {category:"Hair",item:"Sleep cap",note:"",types:["always"]},
+  {category:"Hair",item:"Hair cream / oil",note:"",types:["optional"]},
+  {category:"Hair",item:"Bobby pins and clips",note:"",types:["always"]},
+  {category:"Hair",item:"Gel / edge control",note:"",types:["optional"]},
+  {category:"Hair",item:"Comb",note:"",types:["always"]},
+  {category:"Hair",item:"Brush",note:"",types:["always"]},
+  {category:"Hair",item:"Rollers",note:"",types:["optional"]},
+  {category:"Other",item:"Power strip",note:"Hotel outlets are never where you need them",types:["always"]},
+  {category:"Other",item:"Speaker",note:"",types:["always"]},
+  {category:"Other",item:"Turkish towel",note:"Blanket + coverup + beach towel",types:["always"]},
+  {category:"Other",item:"Water pik",note:"",types:["optional"]},
+  {category:"Other",item:"Luggage scale",note:"",types:["optional"]},
+  {category:"Other",item:"Fabric sheets",note:"",types:["optional"]},
+  {category:"Other",item:"Ziploc bags",note:"",types:["optional"]},
+  {category:"Other",item:"Lint roller",note:"",types:["optional"]},
+  {category:"Other",item:"Nail tools",note:"",types:["optional"]},
+  {category:"Other",item:"Comfort pouch",note:"Febreeze, Lysol, hand soap, laundry soap",types:["optional"]},
+  {category:"Other",item:"Laundry bag",note:"",types:["optional"]},
+  {category:"Other",item:"Steamer",note:"",types:["optional"]},
+  {category:"Other",item:"Stain stick / Tide pen",note:"",types:["optional"]},
+  {category:"Other",item:"AirTag in bag",note:"",types:["optional"]},
+  {category:"Other",item:"Mirror (travel)",note:"",types:["optional"]},
+  {category:"Other",item:"Washcloths",note:"",types:["optional"]},
+  {category:"Other",item:"Plastic bags",note:"",types:["optional"]}
+];
+
+var CAT_ICONS = {"Personal Bag":"💼","In-Flight":"✈️","Clothes":"👕","Shoes":"👟","Toiletries":"🧴","Medical":"💊","Tech":"💻","Makeup":"💄","Hair":"✂️","Other":"📦"};
+var DAYOF_ITEMS = ["Charge everything: iPad, phone, AirPods, power bank, CPAP","Do hair / wrap for travel","Skincare + SPF before leaving","Meds in belt bag — accessible during flight","Passport + wallet double-check","Put on travel outfit + compression socks","CPAP packed last — first out at hotel","Boarding pass downloaded or screenshot saved","Liquids bag at top of bag for TSA"];
+var FORMULAS = {
+  "43221":{desc:"4 tops + 3 bottoms + 2 shoes + 2 accessories + 1 statement piece. Up to 12 mix-and-match looks. Best for 3-6 night trips.",slots:[{key:"tops",label:"Tops",target:4},{key:"bottoms",label:"Bottoms",target:3},{key:"shoes",label:"Shoes",target:2},{key:"acc",label:"Accessories",target:2},{key:"statement",label:"Statement piece / dress",target:1,wide:true}]},
+  "5332":{desc:"5 tops + 3 bottoms + 3 shoes + 2 layers. Up to 15 combinations. Great for 5-7 nights or varied weather.",slots:[{key:"tops",label:"Tops",target:5},{key:"bottoms",label:"Bottoms",target:3},{key:"shoes",label:"Shoes",target:3},{key:"layers",label:"Layers / outerwear",target:2}]},
+  "custom":{desc:"Build your own formula. Add as many pieces as you need.",slots:[{key:"tops",label:"Tops",target:0},{key:"bottoms",label:"Bottoms / skirts",target:0},{key:"dresses",label:"Dresses / jumpsuits",target:0},{key:"shoes",label:"Shoes",target:0},{key:"acc",label:"Accessories",target:0},{key:"layers",label:"Layers",target:0}]}
+};
+
+var allItems = FALLBACK_ITEMS.slice();
+var st = {checks:{},outfits:[],trip:{},open:{},dayof:{},capsule:{},selectedTypes:["always"],addedItems:[],listBuilt:false};
+var filterOn = false;
+var curFormula = "43221";
+
+function loadSt() {
+  try {
+    var raw = localStorage.getItem("packit_v6");
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      st = parsed;
+    }
+  } catch(e) {}
+  if (!st.checks) st.checks = {};
+  if (!st.outfits) st.outfits = [];
+  if (!st.trip) st.trip = {};
+  if (!st.open) st.open = {};
+  if (!st.dayof) st.dayof = {};
+  if (!st.capsule) st.capsule = {};
+  if (!st.selectedTypes) st.selectedTypes = ["always"];
+  if (!st.addedItems) st.addedItems = [];
+  if (typeof st.listBuilt === "undefined") st.listBuilt = false;
+  st.selectedTypes = st.selectedTypes.filter(function(t){ return t !== "extended"; });
+  restoreTripFields();
+  restoreTypeButtons();
+}
+
+function saveSt() { try { localStorage.setItem("packit_v6", JSON.stringify(st)); } catch(e) {} }
+
+function restoreTripFields() {
+  var t = st.trip;
+  if (t.dest) document.getElementById("t-dest").value = t.dest;
+  if (t.occ) document.getElementById("t-occ").value = t.occ;
+  if (t.nights) document.getElementById("t-nights").value = t.nights;
+  if (t.weather) document.getElementById("t-weather").value = t.weather;
+  if (t.colors) document.getElementById("t-colors").value = t.colors;
+  var tn = document.getElementById("t-notes");
+  if (tn && t.notes) tn.value = t.notes;
+}
+
+function restoreTypeButtons() {
+  document.querySelectorAll(".tt-btn[data-type]").forEach(function(btn) {
+    var type = btn.getAttribute("data-type");
+    if (type === "always") return;
+    btn.className = st.selectedTypes.indexOf(type) !== -1 ? "tt-btn on" : "tt-btn";
+  });
+}
+
+function saveTrip() {
+  st.trip = {
+    dest: document.getElementById("t-dest").value,
+    occ: document.getElementById("t-occ").value,
+    nights: document.getElementById("t-nights").value,
+    weather: document.getElementById("t-weather").value,
+    colors: document.getElementById("t-colors").value,
+    notes: document.getElementById("t-notes") ? document.getElementById("t-notes").value : ""
+  };
+  saveSt();
+  updateProgress();
+}
+
+function toggleType(btn) {
+  var type = btn.getAttribute("data-type");
+  if (type === "always") return;
+  var idx = st.selectedTypes.indexOf(type);
+  if (idx === -1) { st.selectedTypes.push(type); btn.className = "tt-btn on"; }
+  else { st.selectedTypes.splice(idx,1); btn.className = "tt-btn"; }
+  saveSt();
+}
+
+function parseCSV(text) {
+  var lines = text.split("\n");
+  var result = [];
+  for (var i = 1; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    var cols = [], cur = "", inQ = false;
+    for (var j = 0; j < line.length; j++) {
+      var ch = line[j];
+      if (ch === '"' && !inQ) { inQ = true; }
+      else if (ch === '"' && inQ) { inQ = false; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    var cat = (cols[0]||"").trim();
+    var itm = (cols[1]||"").trim();
+    var note = (cols[2]||"").trim();
+    var types = (cols[3]||"").trim();
+    if (!cat || !itm) continue;
+    var typeArr = types.split(",").map(function(t){ return t.trim().toLowerCase(); }).filter(Boolean);
+    result.push({category:cat, item:itm, note:note, types:typeArr});
+  }
+  return result;
+}
+
+function tryFetchSheet() {
+  fetch(SHEET_URL)
+    .then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function(items) {
+      if (items && items.length > 10) {
+        allItems = items;
+        try { localStorage.setItem("packit_sheet_cache", JSON.stringify(items)); } catch(e) {}
+        if (st.listBuilt) renderChecklist();
+      }
+    })
+    .catch(function() {
+      var cached = null;
+      try { var c = localStorage.getItem("packit_sheet_cache"); if (c) cached = JSON.parse(c); } catch(e) {}
+      if (cached && cached.length > 10) {
+        allItems = cached;
+        if (st.listBuilt) renderChecklist();
+      }
+    });
+}
+
+function refreshSheet() {
+  tryFetchSheet();
+  alert("Refreshing from Google Sheet. If your sheet is not yet published as CSV, the built-in list will be used.");
+}
+
+function itemMatchesTrip(item) {
+  if (item.types.length === 1 && item.types[0] === "extended") return false;
+  for (var i = 0; i < item.types.length; i++) {
+    if (st.selectedTypes.indexOf(item.types[i]) !== -1) return true;
+  }
+  return false;
+}
+
+function buildList() {
+  saveTrip();
+  st.listBuilt = true;
+  saveSt();
+  document.getElementById("setup-panel").style.display = "none";
+  document.getElementById("list-panel").style.display = "block";
+  renderChecklist();
+}
+
+function resetToSetup() {
+  if (confirm("Start a new trip? This will clear all checks.")) {
+    st.checks = {}; st.trip = {}; st.dayof = {}; st.addedItems = []; st.listBuilt = false;
+    st.selectedTypes = ["always"];
+    ["t-dest","t-occ","t-nights","t-weather","t-colors"].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = "";
+    });
+    saveSt();
+    restoreTypeButtons();
+    document.getElementById("setup-panel").style.display = "block";
+    document.getElementById("list-panel").style.display = "none";
+  }
+}
+
+function groupByCategory(items) {
+  var cats = {}, order = [];
+  items.forEach(function(item) {
+    if (!cats[item.category]) { cats[item.category] = []; order.push(item.category); }
+    cats[item.category].push(item);
+  });
+  return {cats:cats, order:order};
+}
+
+function renderChecklist() {
+  updateProgress();
+  var wrap = document.getElementById("sections");
+  wrap.innerHTML = "";
+
+  var showOptional = st.selectedTypes.indexOf("optional") !== -1;
+  var mainItems = allItems.filter(function(i) {
+    if (i.types.length === 1 && i.types[0] === "extended") return false;
+    if (i.types.length === 1 && i.types[0] === "optional") return showOptional;
+    var hasNonOptional = i.types.some(function(t){ return t !== "optional" && t !== "extended"; });
+    if (!hasNonOptional) return showOptional;
+    return itemMatchesTrip(i);
+  });
+
+  var considerItems = allItems.filter(function(i) {
+    return !mainItems.some(function(m){ return m.item === i.item && m.category === i.category; });
+  });
+
+  st.addedItems.forEach(function(ai) {
+    var inMain = mainItems.some(function(m){ return m.item===ai.item && m.category===ai.category; });
+    if (!inMain) mainItems.push(ai);
+  });
+
+  renderSections(mainItems, wrap, false);
+
+  if (!showOptional && considerItems.length > 0) {
+    var lbl = document.createElement("div");
+    lbl.style.cssText = "font-size:12px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:0.05em;padding:10px 4px 4px;";
+    lbl.textContent = "❓ Also consider";
+    wrap.appendChild(lbl);
+    renderSections(considerItems, wrap, true);
+  }
+}
+
+function renderSections(items, wrap, isConsider) {
+  var grouped = groupByCategory(items);
+  grouped.order.forEach(function(cat) {
+    var catItems = grouped.cats[cat];
+    var visItems = filterOn ? catItems.filter(function(i){ return !st.checks[cat+"_"+i.item]; }) : catItems;
+    if (!visItems.length) return;
+    var done = catItems.filter(function(i){ return st.checks[cat+"_"+i.item]; }).length;
+    var total = catItems.length;
+    var isOpen = st.open[cat] !== false;
+    var secEl = document.createElement("div");
+    secEl.className = isConsider ? "sec consider" : "sec";
+    var icon = CAT_ICONS[cat] || "📋";
+    var hd = document.createElement("div");
+    hd.className = "sec-hd";
+    hd.innerHTML = '<span class="sec-icon">'+icon+'</span>'
+      +'<span class="sec-title">'+cat+'</span>'
+      +'<span class="sec-badge'+(done===total?" done":"")+'">'+done+"/"+total+'</span>'
+      +'<button class="sec-all-btn" data-cat="'+cat+'">all</button>'
+      +'<span class="sec-chev'+(isOpen?" open":"")+'">&#8964;</span>';
+    hd.addEventListener("click", function(e){
+      if (e.target.className==="sec-all-btn") return;
+      toggleSec(cat);
+    });
+    hd.querySelector(".sec-all-btn").addEventListener("click", function(e){
+      e.stopPropagation(); checkCat(cat, catItems);
+    });
+    secEl.appendChild(hd);
+    var body = document.createElement("div");
+    body.className = "sec-body"+(isOpen?" open":"");
+    visItems.forEach(function(item) {
+      var k = cat+"_"+item.item;
+      var checked = !!st.checks[k];
+      var row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = '<div class="cb'+(checked?" on":"")+'">'+( checked?"✓":"")+'</div>'
+        +'<div style="flex:1;min-width:0"><span class="item-lbl'+(checked?" on":"")+'">'+item.item+'</span>'
+        +(item.note?'<span class="item-note">'+item.note+'</span>':'')+'</div>';
+      row.addEventListener("click", function(){ toggleItem(cat, item.item); });
+      body.appendChild(row);
+    });
+    secEl.appendChild(body);
+    wrap.appendChild(secEl);
+  });
+}
+
+function toggleItem(cat, name) {
+  var k = cat+"_"+name; st.checks[k] = !st.checks[k]; saveSt(); renderChecklist();
+}
+function toggleSec(cat) {
+  st.open[cat] = (st.open[cat] !== false) ? false : true; saveSt(); renderChecklist();
+}
+function checkCat(cat, items) {
+  items.forEach(function(i){ st.checks[cat+"_"+i.item] = true; }); saveSt(); renderChecklist();
+}
+function checkAll() {
+  allItems.forEach(function(i){ st.checks[i.category+"_"+i.item] = true; });
+  st.addedItems.forEach(function(i){ st.checks[i.category+"_"+i.item] = true; });
+  saveSt(); renderChecklist();
+}
+function clearAll() { st.checks = {}; saveSt(); renderChecklist(); }
+function toggleFilter() {
+  filterOn = !filterOn;
+  var chip = document.getElementById("filter-chip");
+  chip.className = filterOn ? "chip on" : "chip";
+  chip.textContent = filterOn ? "Show all" : "Show unpacked only";
+  renderChecklist();
+}
+
+function updateProgress() {
+  var t = st.trip;
+  var name = t.dest || "New trip";
+  var meta = [];
+  if (t.nights) meta.push(t.nights+" nights");
+  if (t.weather) meta.push(t.weather);
+  if (t.occ) meta.push(t.occ);
+  document.getElementById("pg-name").textContent = name;
+  document.getElementById("top-pill").textContent = name+(t.nights?" · "+t.nights+"n":"");
+  document.getElementById("pg-meta").textContent = meta.join(" · ")||"";
+  var showOptional = st.selectedTypes.indexOf("optional") !== -1;
+  var mainItems = allItems.filter(function(i){
+    if (i.types.length===1 && i.types[0]==="extended") return false;
+    if (i.types.length===1 && i.types[0]==="optional") return showOptional;
+    return itemMatchesTrip(i);
+  });
+  st.addedItems.forEach(function(ai){
+    var inMain = mainItems.some(function(m){ return m.item===ai.item && m.category===ai.category; });
+    if (!inMain) mainItems.push(ai);
+  });
+  var done=0, total=mainItems.length;
+  mainItems.forEach(function(i){ if (st.checks[i.category+"_"+i.item]) done++; });
+  var pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById("pg-pct").textContent = pct+"%";
+  document.getElementById("pg-bar").style.width = pct+"%";
+  document.getElementById("s-done").textContent = done;
+  document.getElementById("s-left").textContent = total-done;
+  document.getElementById("s-total").textContent = total;
+}
+
+function handleSearch(val) {
+  var wrap = document.getElementById("search-results");
+  val = val.trim().toLowerCase();
+  if (!val) { wrap.style.display="none"; wrap.innerHTML=""; return; }
+  var showOptional = st.selectedTypes.indexOf("optional") !== -1;
+  var inList = {};
+  allItems.filter(function(i){ return itemMatchesTrip(i) || (showOptional && i.types.indexOf("optional")!==-1); })
+    .forEach(function(i){ inList[i.category+"_"+i.item]=true; });
+  st.addedItems.forEach(function(i){ inList[i.category+"_"+i.item]=true; });
+  var matches = allItems.filter(function(i){
+    return i.item.toLowerCase().indexOf(val)!==-1 && !inList[i.category+"_"+i.item];
+  });
+  if (!matches.length) {
+    wrap.style.display="block";
+    wrap.innerHTML='<div class="sr-item" style="color:var(--text3)">Item may already be in your list</div>';
+    return;
+  }
+  wrap.style.display="block"; wrap.innerHTML="";
+  matches.slice(0,8).forEach(function(item){
+    var row=document.createElement("div"); row.className="sr-item";
+    row.innerHTML='<span>'+item.item+' <span style="font-size:11px;color:var(--text3)">— '+item.category+'</span></span><span class="add-tag">+ Add</span>';
+    row.addEventListener("click", function(){
+      st.addedItems.push({category:item.category,item:item.item,note:item.note,types:item.types});
+      saveSt();
+      document.getElementById("search-input").value="";
+      wrap.style.display="none"; wrap.innerHTML="";
+      renderChecklist();
+    });
+    wrap.appendChild(row);
+  });
+}
+
+function showView(name) {
+  document.querySelectorAll(".view").forEach(function(el){ el.className="view"; });
+  document.querySelectorAll(".nav button").forEach(function(el){ el.className=""; });
+  document.getElementById("view-"+name).className="view on";
+  document.getElementById("nav-"+name).className="on";
+  if (name==="outfits"){ renderCapsule(); renderOutfits(); }
+}
+
+function showMethod(m) {
+  document.getElementById("mt-capsule").className=m==="capsule"?"mtab on":"mtab";
+  document.getElementById("mt-daily").className=m==="daily"?"mtab on":"mtab";
+  document.getElementById("method-capsule").style.display=m==="capsule"?"block":"none";
+  document.getElementById("method-daily").style.display=m==="daily"?"block":"none";
+}
+
+function showFormula(f) {
+  curFormula=f;
+  ["43221","5332","custom"].forEach(function(id){ document.getElementById("mf-"+id).className=f===id?"mtab on":"mtab"; });
+  renderCapsule();
+}
+
+function getCapItems(k) {
+  var key=curFormula+"_"+k;
+  if (!st.capsule[key]||!st.capsule[key].length) return [""];
+  return st.capsule[key];
+}
+function setCapItems(k,arr){ st.capsule[curFormula+"_"+k]=arr; saveSt(); }
+
+function renderCapsule() {
+  var formula=FORMULAS[curFormula];
+  document.getElementById("formula-desc").textContent=formula.desc;
+  var grid=document.getElementById("cap-grid"); grid.innerHTML="";
+  formula.slots.forEach(function(slot){
+    var items=getCapItems(slot.key);
+    var filled=items.filter(function(x){return x.trim();}).length;
+    var div=document.createElement("div"); div.className="cap-slot"+(slot.wide?" wide":"");
+    var countOk=slot.target>0&&filled>=slot.target;
+    var countHtml=slot.target>0?filled+"/"+slot.target:""+filled;
+    div.innerHTML='<div class="cap-slot-label">'+slot.label+'<span class="cap-count'+(countOk?" ok":"")+'">'+countHtml+'</span></div>'
+      +'<div class="cap-items" id="ci_'+slot.key+'"></div>'
+      +'<button class="cap-add" onclick="addCapItem(\''+slot.key+'\')">+ add item</button>';
+    grid.appendChild(div);
+    var ciEl=document.getElementById("ci_"+slot.key);
+    items.forEach(function(val,idx){
+      var row=document.createElement("div"); row.className="cap-row";
+      var inp=document.createElement("input"); inp.type="text"; inp.placeholder="e.g. black linen top"; inp.value=val;
+      inp.addEventListener("input",function(){ updateCapItem(slot.key,idx,this.value); });
+      row.appendChild(inp);
+      if (items.length>1){
+        var del=document.createElement("button"); del.className="cap-del"; del.textContent="x";
+        del.addEventListener("click",function(){ removeCapItem(slot.key,idx); });
+        row.appendChild(del);
+      }
+      ciEl.appendChild(row);
+    });
+  });
+  updateMixStats();
+}
+
+function addCapItem(k){ var items=getCapItems(k); items.push(""); setCapItems(k,items); renderCapsule(); }
+function removeCapItem(k,idx){ var items=getCapItems(k); items.splice(idx,1); if(!items.length)items=[""]; setCapItems(k,items); renderCapsule(); }
+function updateCapItem(k,idx,val){ var items=getCapItems(k); items[idx]=val; setCapItems(k,items); updateMixStats(); }
+
+function updateMixStats() {
+  var tops=getCapItems("tops").filter(function(x){return x.trim();});
+  var bots=getCapItems("bottoms").filter(function(x){return x.trim();});
+  var shoes=getCapItems("shoes").filter(function(x){return x.trim();});
+  document.getElementById("mx-looks").textContent=tops.length*(bots.length||1);
+  document.getElementById("mx-tops").textContent=tops.length;
+  document.getElementById("mx-bots").textContent=bots.length;
+  document.getElementById("mx-shoes").textContent=shoes.length;
+  var combosEl=document.getElementById("combos");
+  var list=document.getElementById("combos-list");
+  if(tops.length&&bots.length){
+    combosEl.style.display="block";
+    var html="",n=1;
+    tops.forEach(function(top){bots.forEach(function(bot){
+      html+='<div class="combo-row"><span class="combo-lk">Look '+n+'</span><span>'+top+'</span><span style="color:var(--text3);font-size:11px">+</span><span>'+bot+'</span></div>';n++;
+    });});
+    list.innerHTML=html;
+  } else { combosEl.style.display="none"; }
+}
+
+function renderOutfits() {
+  var wrap=document.getElementById("outfit-list");
+  if(!st.outfits||!st.outfits.length){wrap.innerHTML='<div class="empty">No outfits yet — add one below</div>';return;}
+  wrap.innerHTML="";
+  st.outfits.forEach(function(o,i){
+    var row=document.createElement("div"); row.className="orow";
+    row.innerHTML='<div class="oday">'+o.day+'</div><div class="oinfo"><div class="odesc">'+(o.fit||"—")+'</div>'+(o.shoes?'<div class="oshoe">Shoes: '+o.shoes+'</div>':'')+(o.notes?'<div class="oshoe">Notes: '+o.notes+'</div>':'')+'</div>';
+    var del=document.createElement("button"); del.className="odel"; del.textContent="×";
+    del.addEventListener("click",function(){delOutfit(i);});
+    row.appendChild(del); wrap.appendChild(row);
+  });
+}
+
+function addOutfit(){
+  var day=document.getElementById("o-day").value.trim();
+  if(!day){alert("Please enter a day label");return;}
+  st.outfits.push({day:day,fit:document.getElementById("o-fit").value.trim(),shoes:document.getElementById("o-shoes").value.trim(),notes:document.getElementById("o-notes").value.trim()});
+  ["o-day","o-fit","o-shoes","o-notes"].forEach(function(id){document.getElementById(id).value="";});
+  saveSt(); renderOutfits();
+}
+function delOutfit(i){st.outfits.splice(i,1);saveSt();renderOutfits();}
+
+function renderDayOf(){
+  var wrap=document.getElementById("dayof"); wrap.innerHTML="";
+  DAYOF_ITEMS.forEach(function(text,i){
+    var ck=!!st.dayof[i];
+    var row=document.createElement("div"); row.className="dayof-item";
+    row.innerHTML='<div class="cb'+(ck?" on":"")+'">'+( ck?"✓":"")+'</div><span class="item-lbl'+(ck?" on":"")+'">'+text+'</span>';
+    row.addEventListener("click",function(){st.dayof[i]=!st.dayof[i];saveSt();renderDayOf();});
+    wrap.appendChild(row);
+  });
+}
+
+// INIT
+loadSt();
+renderDayOf();
+if(st.listBuilt){
+  document.getElementById("setup-panel").style.display="none";
+  document.getElementById("list-panel").style.display="block";
+  renderChecklist();
+}
+tryFetchSheet();
+</script>
+</body>
+</html>
