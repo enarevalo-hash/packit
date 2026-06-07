@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skincare Routine</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; padding: 16px; font-size: 14px; }
+  h1 { font-size: 17px; font-weight: 500; margin-bottom: 14px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { padding: 7px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1.5px solid #ccc; background: transparent; color: #666; transition: all .15s; }
+  .tab.active { background: #fff; border-color: #999; color: #1a1a18; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .day-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 6px; }
+  .section-title { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: .05em; margin: 10px 0 4px; }
+  .steps { display: flex; flex-direction: column; gap: 4px; }
+  .step { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 8px; background: #fff; }
+  .step.optional { background: transparent; border: 1.5px dashed #ddd; opacity: .8; }
+  .step.highlight-s { background: #f0ebff; }
+  .step.highlight-c { background: #ebfaf3; }
+  .num { font-weight: 600; color: #bbb; min-width: 18px; font-size: 12px; padding-top: 2px; }
+  .product { font-weight: 500; font-size: 13px; }
+  .role { font-size: 11px; color: #999; margin-top: 2px; }
+  .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 20px; margin-left: 6px; vertical-align: middle; font-weight: 500; }
+  .tag-new { background: #dbeafe; color: #1d4ed8; }
+  .tag-c { background: #fef3c7; color: #92400e; }
+  .tag-opt { background: #f3f4f6; color: #6b7280; }
+  .tag-serum { background: #ede9fe; color: #5b21b6; }
+  .tag-cream { background: #d1fae5; color: #065f46; }
+  .divider { border: none; border-top: 1px solid #e5e5e3; margin: 14px 0; }
+  .note { font-size: 12px; color: #666; background: #fff; border-left: 3px solid #ddd; padding: 8px 10px; border-radius: 0 8px 8px 0; margin-top: 6px; line-height: 1.5; }
+  .legend { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #888; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1c1c1a; color: #e0dfd8; }
+    .tab { border-color: #444; color: #999; }
+    .tab.active { background: #2a2a28; border-color: #666; color: #e0dfd8; }
+    .step { background: #2a2a28; }
+    .step.highlight-s { background: #231e38; }
+    .step.highlight-c { background: #0e2a1e; }
+    .step.optional { background: transparent; border-color: #444; }
+    .note { background: #2a2a28; border-color: #444; color: #aaa; }
+    .tag-new { background: #1e3a5f; color: #93c5fd; }
+    .tag-c { background: #3d2e0a; color: #fbbf24; }
+    .tag-opt { background: #2a2a28; color: #888; }
+    .tag-serum { background: #2e1f5e; color: #c4b5fd; }
+    .tag-cream { background: #064e3b; color: #6ee7b7; }
+  }
+</style>
+</head>
+<body>
+<h1>Skincare Routine</h1>
+<div class="tabs">
+  <button class="tab active" onclick="show('am',event)">☀️ Morning</button>
+  <button class="tab" onclick="show('pm',event)">🌙 Evening</button>
+</div>
+
+<!-- AM -->
+<div class="panel active" id="am">
+  <div class="day-label">Every morning</div>
+  <div class="section-title">Toners</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Etude Soon Jung 5.5</div><div class="role">pH balance · barrier prep</div></div></div>
+    <div class="step"><span class="num">2</span><div><div class="product">Peach & Lily Wild Dew Essence</div><div class="role">Hydration · glow</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Isntree Green Tea Ceramide Milk</div><div class="role">Ceramide seal · soothe</div></div></div>
+  </div>
+  <div class="section-title">Treatments & Finish</div>
+  <div class="steps">
+    <div class="step"><span class="num">4</span><div><div class="product">Biossance Brightening Eye Serum</div><div class="role">Eye area — thinnest first</div></div></div>
+    <div class="step"><span class="num">5</span><div><div class="product">Educated Mess Golden Hour <span class="tag tag-c">Vitamin C</span></div><div class="role">Thinner — absorbs directly for max antioxidant effect</div></div></div>
+    <div class="step"><span class="num">6</span><div><div class="product">Peach & Lily Exosome Serum <span class="tag tag-new">new</span></div><div class="role">Thicker — seals over C · repair · barrier · glow</div></div></div>
+    <div class="step"><span class="num">7</span><div><div class="product">BOJ Aquafresh SPF <span class="tag tag-opt">→ swap Tatch Milky</span></div><div class="role">Protect — always last</div></div></div>
+  </div>
+  <div class="note">Thinnest to thickest: Golden Hour goes before Exosome so vitamin C absorbs fully. Exosome then bridges between treatment and SPF.</div>
+</div>
+
+<!-- PM -->
+<div class="panel" id="pm">
+  <div class="legend">
+    <div class="legend-item"><span class="tag tag-serum">GHK-Cu serum</span> retinal nights + recovery</div>
+    <div class="legend-item"><span class="tag tag-cream">PDRN cream</span> exfoliant/peel nights + recovery</div>
+  </div>
+
+  <div class="day-label">Every PM — toner stack first</div>
+  <div class="steps">
+    <div class="step"><span class="num">T1</span><div><div class="product">Isntree HA Toner Blue</div><div class="role">Hydrate · plump</div></div></div>
+    <div class="step"><span class="num">T2</span><div><div class="product">Etude Soon Jung 5.5</div><div class="role">pH balance · barrier</div></div></div>
+    <div class="step"><span class="num">T3</span><div><div class="product">I'm From Mugwort Essence</div><div class="role">Soothe · calm — use lightly on exfoliant nights</div></div></div>
+  </div>
+  <div class="note" style="margin-bottom:4px">Then follow with your night-specific steps ↓</div>
+
+  <hr class="divider">
+
+  <div class="day-label">Sunday — Peel night</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Dr. Dennis Gross Peel Pads</div><div class="role">AHA/BHA treat</div></div></div>
+    <div class="step"><span class="num">2</span><div><div class="product">Aestura Hydro Essence</div><div class="role">Hydrate</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Biossance Marine Algae Eye Cream</div><div class="role">Eye area</div></div></div>
+    <div class="step highlight-c"><span class="num">4</span><div><div class="product">Rejuall PDRN Cream <span class="tag tag-cream">PDRN cream night</span></div><div class="role">Moisturize · barrier repair</div></div></div>
+    <div class="step"><span class="num">5</span><div><div class="product">Skinfix Barrier+ Peptide Cream</div><div class="role">Seal</div></div></div>
+    <div class="step optional"><span class="num">6</span><div><div class="product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div><div class="role">Lock in · nourish</div></div></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="day-label">Mon / Wed / Fri — Retinal nights</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Geek & Gorgeous Retinal</div><div class="role">Treat — clean dry skin</div></div></div>
+    <div class="step highlight-s"><span class="num">2</span><div><div class="product">Dr. Reju-All GHK-Cu / PDRN Serum <span class="tag tag-serum">serum night</span></div><div class="role">Firm · repair · peptides</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Biossance Marine Algae Eye Cream</div><div class="role">Eye area</div></div></div>
+    <div class="step"><span class="num">4</span><div><div class="product">Skinfix Barrier+ Peptide Cream</div><div class="role">Seal</div></div></div>
+    <div class="step optional"><span class="num">5</span><div><div class="product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div><div class="role">Lock in · nourish — good on retinal nights</div></div></div>
+  </div>
+  <div class="note">No PDRN cream on retinal nights — GHK-Cu serum handles repair and keeps the routine lean.</div>
+
+  <hr class="divider">
+
+  <div class="day-label">Tuesday — Good Genes night</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Sunday Riley Good Genes</div><div class="role">AHA · lactic acid</div></div></div>
+    <div class="step"><span class="num">2</span><div><div class="product">Aestura Hydro Essence</div><div class="role">Hydrate</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Biossance Marine Algae Eye Cream</div><div class="role">Eye area</div></div></div>
+    <div class="step highlight-c"><span class="num">4</span><div><div class="product">Rejuall Rejuvenating Cream Max <span class="tag tag-cream">PDRN cream night</span></div><div class="role">Moisturize · barrier repair</div></div></div>
+    <div class="step"><span class="num">5</span><div><div class="product">Skinfix Barrier+ Peptide Cream</div><div class="role">Seal</div></div></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="day-label">Thursday — Microfoliant night</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Dermalogica Daily Microfoliant</div><div class="role">Polish</div></div></div>
+    <div class="step"><span class="num">2</span><div><div class="product">Aestura Hydro Essence</div><div class="role">Hydrate</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Biossance Marine Algae Eye Cream</div><div class="role">Eye area</div></div></div>
+    <div class="step highlight-c"><span class="num">4</span><div><div class="product">Rejuall PDRN Cream <span class="tag tag-cream">PDRN cream night</span></div><div class="role">Moisturize · barrier repair</div></div></div>
+    <div class="step optional"><span class="num">5</span><div><div class="product">Skinfix Barrier+ Peptide Cream <span class="tag tag-opt">optional</span></div><div class="role">Seal</div></div></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="day-label">Saturday — Recovery night</div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><div class="product">Aestura Hydro Essence</div><div class="role">Hydrate</div></div></div>
+    <div class="step highlight-s"><span class="num">2</span><div><div class="product">Dr. Reju-All GHK-Cu / PDRN Serum <span class="tag tag-serum">serum night</span></div><div class="role">Firm · repair · peptides</div></div></div>
+    <div class="step"><span class="num">3</span><div><div class="product">Biossance Marine Algae Eye Cream</div><div class="role">Eye area</div></div></div>
+    <div class="step highlight-c"><span class="num">4</span><div><div class="product">Rejuall Rejuvenating Cream Max <span class="tag tag-cream">PDRN cream night</span></div><div class="role">Moisturize · barrier repair</div></div></div>
+    <div class="step"><span class="num">5</span><div><div class="product">Skinfix Barrier+ Peptide Cream</div><div class="role">Seal</div></div></div>
+    <div class="step optional"><span class="num">6</span><div><div class="product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div><div class="role">Lock in · nourish</div></div></div>
+  </div>
+  <div class="note">Only night with both PDRN products — serum absorbs first, cream moisturizes on top. No actives competing so both work fully.</div>
+</div>
+
+<script>
+function show(id, e) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.target.classList.add('active');
+}
+</script>
+</body>
+</html>
