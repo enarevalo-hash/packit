@@ -15,8 +15,6 @@
   .tab.active { background: #1a1a18; border-color: #1a1a18; color: #fff; }
   .panel { display: none; padding: 12px 16px 32px; }
   .panel.active { display: block; }
-
-  /* Day cards */
   .day-card { margin-bottom: 10px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #ece9e4; }
   .day-header { padding: 10px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
   .day-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -26,38 +24,29 @@
   .day-card.open .chevron { transform: rotate(180deg); }
   .day-body { display: none; border-top: 1px solid #f0ede8; }
   .day-card.open .day-body { display: block; }
-
-  /* Toner block */
   .toner-block { padding: 8px 14px; background: #faf9f7; border-bottom: 1px solid #f0ede8; }
   .toner-label { font-size: 10px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
   .toner-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; margin-bottom: 3px; }
   .toner-arrow { color: #ddd; font-size: 10px; }
-
-  /* Steps */
+  .toner-skip { font-size: 10px; color: #e8876a; font-weight: 500; margin-left: 4px; }
   .steps { padding: 8px 14px; }
-  .step { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f5f2ee; }
+  .step { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f5f2ee; }
   .step:last-child { border-bottom: none; }
-  .step.optional { opacity: .65; }
-  .step-num { font-size: 11px; font-weight: 600; color: #ccc; min-width: 16px; padding-top: 2px; }
+  .step.optional { opacity: .6; }
+  .step-num { font-size: 11px; font-weight: 600; color: #ccc; min-width: 16px; padding-top: 3px; flex-shrink: 0; }
   .step-info { flex: 1; }
-  .step-product { font-size: 13px; font-weight: 500; color: #1a1a18; }
-  .step-role { font-size: 11px; color: #aaa; margin-top: 1px; }
+  .step-product { font-size: 13px; font-weight: 500; color: #1a1a18; line-height: 1.3; }
+  .step-meta { font-size: 11px; color: #aaa; margin-top: 3px; line-height: 1.4; }
+  .step-wait { font-size: 11px; color: #8b6fbf; font-weight: 500; margin-top: 2px; }
   .tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 20px; margin-left: 5px; vertical-align: middle; font-weight: 500; }
   .tag-c { background: #fef3c7; color: #92400e; }
   .tag-opt { background: #f3f4f6; color: #9ca3af; }
   .tag-ghk { background: #ede9fe; color: #5b21b6; }
   .tag-egf { background: #fce7f3; color: #9d174d; }
   .tag-pdrn { background: #d1fae5; color: #065f46; }
-
-  /* Legend */
+  .tag-spf { background: #fef9c3; color: #854d0e; }
   .legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 4px; }
   .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #999; }
-
-  /* Loading */
-  .loading { text-align: center; padding: 40px 16px; color: #bbb; font-size: 13px; }
-  .error-msg { margin: 16px; padding: 12px; background: #fff0f0; border-radius: 8px; font-size: 12px; color: #c00; }
-
-  /* Day dot colors */
   .dot-sun { background: #f97316; }
   .dot-ret { background: #8b5cf6; }
   .dot-tue { background: #ec4899; }
@@ -65,7 +54,6 @@
   .dot-sat { background: #10b981; }
   .dot-am-a { background: #f59e0b; }
   .dot-am-b { background: #6366f1; }
-
   @media (prefers-color-scheme: dark) {
     body { background: #141412; color: #e0dfd8; }
     header { border-color: #2a2a28; }
@@ -81,213 +69,487 @@
     .tag-ghk { background: #2e1f5e; color: #c4b5fd; }
     .tag-egf { background: #4a0e2a; color: #f9a8d4; }
     .tag-pdrn { background: #064e3b; color: #6ee7b7; }
+    .tag-spf { background: #3d3000; color: #fde68a; }
   }
 </style>
 </head>
 <body>
-
 <header>
   <h1>Skincare Routine</h1>
-  <div class="subtitle" id="last-updated">Loading from Google Sheets…</div>
+  <div class="subtitle">AM · PM — tap a day to expand</div>
 </header>
-
 <div class="tabs">
   <button class="tab active" onclick="show('am',event)">☀️ Morning</button>
   <button class="tab" onclick="show('pm',event)">🌙 Evening</button>
 </div>
-
 <div class="legend">
-  <div class="legend-item"><span class="tag tag-ghk">GHK-Cu</span> copper peptide serum</div>
+  <div class="legend-item"><span class="tag tag-ghk">GHK-Cu</span> copper peptide</div>
   <div class="legend-item"><span class="tag tag-egf">EGF</span> growth factor</div>
-  <div class="legend-item"><span class="tag tag-pdrn">PDRN</span> cream nights</div>
+  <div class="legend-item"><span class="tag tag-pdrn">PDRN</span> repair cream</div>
   <div class="legend-item"><span class="tag tag-opt">optional</span></div>
 </div>
 
+<!-- ═══ AM ═══ -->
 <div class="panel active" id="am">
-  <div id="am-content"><div class="loading">Loading…</div></div>
+
+  <div class="day-card open" id="card-am-a">
+    <div class="day-header" onclick="toggle('card-am-a')">
+      <div class="day-dot dot-am-a"></div>
+      <div class="day-name">Day A — Mon / Wed / Fri / Sun</div>
+      <div class="day-sub">Vitamin C</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Peach & Lily Wild Dew Essence</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Isntree Green Tea Ceramide Milk</div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Innisfree Bounce Booster Eye & Lip</div>
+            <div class="step-meta">Rice grain per eye · pat gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Educated Mess Golden Hour <span class="tag tag-c">Vitamin C</span></div>
+            <div class="step-meta">Warm between fingers · press into skin</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">BOJ Aquafresh SPF <span class="tag tag-spf">→ swap Tatch Milky</span></div>
+            <div class="step-meta">Always last · generous application</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-card" id="card-am-b">
+    <div class="day-header" onclick="toggle('card-am-b')">
+      <div class="day-dot dot-am-b"></div>
+      <div class="day-name">Day B — Tue / Thu / Sat</div>
+      <div class="day-sub">Copper peptide</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Peach & Lily Wild Dew Essence</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Isntree Green Tea Ceramide Milk</div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Innisfree Bounce Booster Eye & Lip</div>
+            <div class="step-meta">Rice grain per eye · pat gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All GHK-Cu / PDRN Serum <span class="tag tag-ghk">GHK-Cu</span></div>
+            <div class="step-meta">3-4 drops · press into skin</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">BOJ Aquafresh SPF <span class="tag tag-spf">→ swap Tatch Milky</span></div>
+            <div class="step-meta">Always last · generous application</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- ═══ PM ═══ -->
 <div class="panel" id="pm">
-  <div id="pm-content"><div class="loading">Loading…</div></div>
+
+  <!-- SUNDAY -->
+  <div class="day-card open" id="card-sun">
+    <div class="day-header" onclick="toggle('card-sun')">
+      <div class="day-dot dot-sun"></div>
+      <div class="day-name">Sunday</div>
+      <div class="day-sub">Peel night</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Isntree HA Toner Blue</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>I'm From Mugwort <span class="toner-skip">⚠ skip or 1 light swipe only</span></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Dennis Gross Peel Pads</div>
+            <div class="step-meta">Swipe once · do not rinse</div>
+            <div class="step-wait">⏱ Wait 90 seconds before next step</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Anua PDRN Mist <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">2-3 sprays · hold 6-8 inches from face · pat in</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">Aestura Hydro Essence</div>
+            <div class="step-meta">2-3 pumps · pat into skin</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-product">COSRX 6 Peptide Booster</div>
+            <div class="step-meta">2-3 pumps · spread across whole face · pat in</div>
+            <div class="step-wait">⏱ Wait 30 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-product">Dear Klairs EGF <span class="tag tag-egf">EGF</span></div>
+            <div class="step-meta">2-3 drops · press gently into skin</div>
+            <div class="step-wait">⏱ Wait 60 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-info">
+            <div class="step-product">Biossance Marine Algae Eye Cream</div>
+            <div class="step-meta">Rice grain per eye · tap gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All Rejuvenating Cream Max <span class="tag tag-pdrn">PDRN</span></div>
+            <div class="step-meta">Pea size · warm and press in</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">8</div>
+          <div class="step-info">
+            <div class="step-product">Skinfix Barrier+ Peptide Cream</div>
+            <div class="step-meta">Pea size · seal everything in</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">9</div>
+          <div class="step-info">
+            <div class="step-product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">3-4 drops · press over Skinfix</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETINAL -->
+  <div class="day-card" id="card-ret">
+    <div class="day-header" onclick="toggle('card-ret')">
+      <div class="day-dot dot-ret"></div>
+      <div class="day-name">Mon / Wed / Fri</div>
+      <div class="day-sub">Retinal — keep it lean</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Isntree HA Toner Blue</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>I'm From Mugwort <span style="font-size:10px;color:#10b981;font-weight:500;margin-left:4px">✓ keep — soothes before retinal</span></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Geek & Gorgeous Retinal</div>
+            <div class="step-meta">Rice grain size · clean dry skin only</div>
+            <div class="step-wait">⏱ Wait 20-30 seconds before next step</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All GHK-Cu / PDRN Serum <span class="tag tag-ghk">GHK-Cu</span></div>
+            <div class="step-meta">3-4 drops · press into skin · supports retinal repair</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">Biossance Marine Algae Eye Cream</div>
+            <div class="step-meta">Rice grain per eye · tap gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-product">Skinfix Barrier+ Peptide Cream</div>
+            <div class="step-meta">Pea size · seal everything in</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">3-4 drops · especially good if skin feels dry from retinal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TUESDAY -->
+  <div class="day-card" id="card-tue">
+    <div class="day-header" onclick="toggle('card-tue')">
+      <div class="day-dot dot-tue"></div>
+      <div class="day-name">Tuesday</div>
+      <div class="day-sub">Good Genes night</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Isntree HA Toner Blue</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>I'm From Mugwort <span class="toner-skip">⚠ skip or 1 light swipe only</span></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Sunday Riley Good Genes</div>
+            <div class="step-meta">1 full pump · spread evenly</div>
+            <div class="step-wait">⏱ Wait 3-5 minutes before next step</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Torriden Dive-In <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">3-5 drops · if skin needs extra hydration</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">COSRX 6 Peptide Booster</div>
+            <div class="step-meta">2-3 pumps · spread across whole face · pat in</div>
+            <div class="step-wait">⏱ Wait 30 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-product">Dear Klairs EGF <span class="tag tag-egf">EGF</span></div>
+            <div class="step-meta">2-3 drops · press gently into skin</div>
+            <div class="step-wait">⏱ Wait 60 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-product">Biossance Marine Algae Eye Cream</div>
+            <div class="step-meta">Rice grain per eye · tap gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All Rejuvenating Cream Max <span class="tag tag-pdrn">PDRN</span></div>
+            <div class="step-meta">Pea size · warm and press in</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-info">
+            <div class="step-product">Skinfix Barrier+ Peptide Cream</div>
+            <div class="step-meta">Pea size · seal everything in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THURSDAY -->
+  <div class="day-card" id="card-thu">
+    <div class="day-header" onclick="toggle('card-thu')">
+      <div class="day-dot dot-thu"></div>
+      <div class="day-name">Thursday</div>
+      <div class="day-sub">Microfoliant night</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Isntree HA Toner Blue</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>I'm From Mugwort <span class="toner-skip">⚠ skip or 1 light swipe only</span></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Dermalogica Daily Microfoliant</div>
+            <div class="step-meta">Activate with water · gentle circles · rinse well</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Aestura Hydro Essence</div>
+            <div class="step-meta">2-3 pumps · pat into skin</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">COSRX 6 Peptide Booster</div>
+            <div class="step-meta">2-3 pumps · spread across whole face · pat in</div>
+            <div class="step-wait">⏱ Wait 30 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-product">Dear Klairs EGF <span class="tag tag-egf">EGF</span></div>
+            <div class="step-meta">2-3 drops · press gently into skin</div>
+            <div class="step-wait">⏱ Wait 60 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-product">Biossance Marine Algae Eye Cream</div>
+            <div class="step-meta">Rice grain per eye · tap gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All Rejuvenating Cream Max <span class="tag tag-pdrn">PDRN</span></div>
+            <div class="step-meta">Pea size · warm and press in</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">7</div>
+          <div class="step-info">
+            <div class="step-product">Skinfix Barrier+ Peptide Cream <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">Pea size · skip if skin feels balanced</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SATURDAY -->
+  <div class="day-card" id="card-sat">
+    <div class="day-header" onclick="toggle('card-sat')">
+      <div class="day-dot dot-sat"></div>
+      <div class="day-name">Saturday</div>
+      <div class="day-sub">Recovery night</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="day-body">
+      <div class="toner-block">
+        <div class="toner-label">Toners</div>
+        <div class="toner-row"><span style="width:14px;display:inline-block"></span>Isntree HA Toner Blue</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>Etude Soon Jung 5.5</div>
+        <div class="toner-row"><span class="toner-arrow">→</span>I'm From Mugwort <span style="font-size:10px;color:#10b981;font-weight:500;margin-left:4px">✓ keep — no actives tonight</span></div>
+      </div>
+      <div class="steps">
+        <div class="step optional">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-product">Anua PDRN Mist <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">2-3 sprays · hold 6-8 inches from face · pat in</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-product">Torriden Dive-In <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">3-5 drops · if extra hydration needed</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-product">COSRX 6 Peptide Booster</div>
+            <div class="step-meta">2-3 pumps · spread across whole face · pat in</div>
+            <div class="step-wait">⏱ Wait 30 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-product">Dear Klairs EGF <span class="tag tag-egf">EGF</span></div>
+            <div class="step-meta">2-3 drops · press gently into skin</div>
+            <div class="step-wait">⏱ Wait 60 seconds</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-product">Biossance Marine Algae Eye Cream</div>
+            <div class="step-meta">Rice grain per eye · tap gently</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-info">
+            <div class="step-product">Dr. Reju-All Rejuvenating Cream Max <span class="tag tag-pdrn">PDRN</span></div>
+            <div class="step-meta">Pea size · warm and press in</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-info">
+            <div class="step-product">Skinfix Barrier+ Peptide Cream</div>
+            <div class="step-meta">Pea size · seal everything in</div>
+          </div>
+        </div>
+        <div class="step optional">
+          <div class="step-num">8</div>
+          <div class="step-info">
+            <div class="step-product">Sunday Riley Juno Oil <span class="tag tag-opt">optional</span></div>
+            <div class="step-meta">3-4 drops · press over Skinfix · best recovery night treat</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-// ── CONFIGURATION ──────────────────────────────────────────────
-// Replace this with your published Google Sheet CSV URL
-// Instructions below on how to get this URL
-const SHEET_URL = 'PASTE_YOUR_SHEET_CSV_URL_HERE';https://docs.google.com/spreadsheets/d/e/2PACX-1vQnKJp4tSZ-Yb_UWkGMLmLBDcF439w6Y7blS5PSgqGqta1f8jAHNvjn1pf3NRAwYIvwdeP5OEwupxUA/pub?output=csv
-
-const FALLBACK = {
-  am: [
-    { id:'am-a', label:'Day A — Mon / Wed / Fri / Sun', sub:'Vitamin C morning', dot:'dot-am-a', toners:['Etude Soon Jung 5.5','Peach & Lily Wild Dew Essence','Isntree Green Tea Ceramide Milk'], steps:[
-      { num:1, product:'Biossance Brightening Eye Serum', role:'Eye area', tags:[] },
-      { num:2, product:'Educated Mess Golden Hour', role:'Moisturize · antioxidant', tags:['c'] },
-      { num:3, product:'BOJ Aquafresh SPF', role:'Protect — always last', tags:['opt'], note:'→ swap Tatch Milky' },
-    ]},
-    { id:'am-b', label:'Day B — Tue / Thu / Sat', sub:'Copper peptide morning', dot:'dot-am-b', toners:['Etude Soon Jung 5.5','Peach & Lily Wild Dew Essence','Isntree Green Tea Ceramide Milk'], steps:[
-      { num:1, product:'Biossance Brightening Eye Serum', role:'Eye area', tags:[] },
-      { num:2, product:'Dr. Reju-All GHK-Cu / PDRN Serum', role:'Firm · repair · copper peptides', tags:['ghk'] },
-      { num:3, product:'BOJ Aquafresh SPF', role:'Protect — always last', tags:['opt'], note:'→ swap Tatch Milky' },
-    ]},
-  ],
-  pm: [
-    { id:'sun', label:'Sunday', sub:'Peel night', dot:'dot-sun', toners:['Isntree HA Toner Blue','Etude Soon Jung 5.5','I\'m From Mugwort (light)'], steps:[
-      { num:1, product:'Dr. Dennis Gross Peel Pads', role:'AHA/BHA treat', tags:[] },
-      { num:2, product:'Torriden Dive-In / Aestura Hydro Essence', role:'Hydrate — one or both', tags:[] },
-      { num:3, product:'Dear Klairs EGF', role:'Cell renewal · repair signal', tags:['egf'] },
-      { num:4, product:'Biossance Marine Algae Eye Cream', role:'Eye area', tags:[] },
-      { num:5, product:'Rejuall PDRN Cream', role:'Moisturize · barrier repair', tags:['pdrn'] },
-      { num:6, product:'Skinfix Barrier+ Peptide Cream', role:'Seal', tags:[] },
-      { num:7, product:'Sunday Riley Juno Oil', role:'Lock in · nourish', tags:['opt'], optional:true },
-    ]},
-    { id:'ret', label:'Mon / Wed / Fri', sub:'Retinal nights — keep it lean', dot:'dot-ret', toners:['Isntree HA Toner Blue','Etude Soon Jung 5.5','I\'m From Mugwort'], steps:[
-      { num:1, product:'Geek & Gorgeous Retinal', role:'Treat — clean dry skin', tags:[] },
-      { num:2, product:'Torriden Dive-In / Aestura Hydro Essence', role:'Hydrate — one, not both', tags:[] },
-      { num:3, product:'Biossance Marine Algae Eye Cream', role:'Eye area', tags:[] },
-      { num:4, product:'Skinfix Barrier+ Peptide Cream', role:'Seal', tags:[] },
-      { num:5, product:'Sunday Riley Juno Oil', role:'Lock in · nourish', tags:['opt'], optional:true },
-    ]},
-    { id:'tue', label:'Tuesday', sub:'Good Genes night', dot:'dot-tue', toners:['Isntree HA Toner Blue','Etude Soon Jung 5.5','I\'m From Mugwort (light)'], steps:[
-      { num:1, product:'Sunday Riley Good Genes', role:'AHA · lactic acid', tags:[] },
-      { num:2, product:'Torriden Dive-In / Aestura Hydro Essence', role:'Hydrate — one or both', tags:[] },
-      { num:3, product:'Dear Klairs EGF', role:'Cell renewal · repair signal', tags:['egf'] },
-      { num:4, product:'Biossance Marine Algae Eye Cream', role:'Eye area', tags:[] },
-      { num:5, product:'Rejuall Rejuvenating Cream Max', role:'Moisturize · barrier repair', tags:['pdrn'] },
-      { num:6, product:'Skinfix Barrier+ Peptide Cream', role:'Seal', tags:[] },
-    ]},
-    { id:'thu', label:'Thursday', sub:'Microfoliant night', dot:'dot-thu', toners:['Isntree HA Toner Blue','Etude Soon Jung 5.5','I\'m From Mugwort (light)'], steps:[
-      { num:1, product:'Dermalogica Daily Microfoliant', role:'Polish', tags:[] },
-      { num:2, product:'Torriden Dive-In / Aestura Hydro Essence', role:'Hydrate — one or both', tags:[] },
-      { num:3, product:'Dear Klairs EGF', role:'Cell renewal · repair signal', tags:['egf'] },
-      { num:4, product:'Biossance Marine Algae Eye Cream', role:'Eye area', tags:[] },
-      { num:5, product:'Rejuall PDRN Cream', role:'Moisturize · barrier repair', tags:['pdrn'] },
-      { num:6, product:'Skinfix Barrier+ Peptide Cream', role:'Seal — optional', tags:['opt'], optional:true },
-    ]},
-    { id:'sat', label:'Saturday', sub:'Recovery night', dot:'dot-sat', toners:['Isntree HA Toner Blue','Etude Soon Jung 5.5','I\'m From Mugwort'], steps:[
-      { num:1, product:'Torriden Dive-In / Aestura Hydro Essence', role:'Hydrate — one or both', tags:[] },
-      { num:2, product:'Dear Klairs EGF', role:'Cell renewal · repair signal', tags:['egf'] },
-      { num:3, product:'Biossance Marine Algae Eye Cream', role:'Eye area', tags:[] },
-      { num:4, product:'Rejuall Rejuvenating Cream Max', role:'Moisturize · barrier repair', tags:['pdrn'] },
-      { num:5, product:'Skinfix Barrier+ Peptide Cream', role:'Seal', tags:[] },
-      { num:6, product:'Sunday Riley Juno Oil', role:'Lock in · nourish', tags:['opt'], optional:true },
-    ]},
-  ]
-};
-
-function tagHTML(tags, note) {
-  let h = '';
-  if (tags.includes('c')) h += '<span class="tag tag-c">Vitamin C</span>';
-  if (tags.includes('ghk')) h += '<span class="tag tag-ghk">GHK-Cu</span>';
-  if (tags.includes('egf')) h += '<span class="tag tag-egf">EGF</span>';
-  if (tags.includes('pdrn')) h += '<span class="tag tag-pdrn">PDRN</span>';
-  if (tags.includes('opt')) h += '<span class="tag tag-opt">optional</span>';
-  if (note) h += ' <span style="font-size:10px;color:#bbb">'+note+'</span>';
-  return h;
-}
-
-function renderDays(days, containerId) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = days.map((day, i) => `
-    <div class="day-card ${i===0?'open':''}" id="card-${day.id}">
-      <div class="day-header" onclick="toggle('card-${day.id}')">
-        <div class="day-dot ${day.dot}"></div>
-        <div class="day-name">${day.label}</div>
-        <div class="day-sub">${day.sub}</div>
-        <div class="chevron">▼</div>
-      </div>
-      <div class="day-body">
-        <div class="toner-block">
-          <div class="toner-label">Toners</div>
-          ${day.toners.map((t,idx) => `
-            <div class="toner-row">
-              ${idx>0?'<span class="toner-arrow">→</span>':'<span style="width:14px;display:inline-block"></span>'}
-              <span>${t}</span>
-            </div>`).join('')}
-        </div>
-        <div class="steps">
-          ${day.steps.map(s => `
-            <div class="step ${s.optional?'optional':''}">
-              <div class="step-num">${s.num}</div>
-              <div class="step-info">
-                <div class="step-product">${s.product}${tagHTML(s.tags, s.note)}</div>
-                <div class="step-role">${s.role}</div>
-              </div>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function toggle(id) {
-  document.getElementById(id).classList.toggle('open');
-}
-
+function toggle(id) { document.getElementById(id).classList.toggle('open'); }
 function show(id, e) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   e.target.classList.add('active');
 }
-
-// Parse CSV from Google Sheets
-// Sheet columns: Panel, DayID, DayLabel, DaySub, DotClass, TonerOrder, StepNum, Product, Role, Tags, Optional, Note
-function parseCSV(text) {
-  const lines = text.trim().split('\n').slice(1); // skip header
-  const amMap = {}, pmMap = {};
-
-  lines.forEach(line => {
-    const cols = line.split(',').map(c => c.replace(/^"|"$/g,'').trim());
-    const [panel, dayId, dayLabel, daySub, dotClass, tonerOrder, stepNum, product, role, tags, optional, note] = cols;
-    if (!panel || !product) return;
-
-    const map = panel.toLowerCase() === 'am' ? amMap : pmMap;
-    if (!map[dayId]) map[dayId] = { id:dayId, label:dayLabel, sub:daySub, dot:dotClass, toners:[], steps:[] };
-
-    if (tonerOrder && !isNaN(parseInt(tonerOrder))) {
-      map[dayId].toners[parseInt(tonerOrder)-1] = product;
-    } else if (stepNum && !isNaN(parseInt(stepNum))) {
-      map[dayId].steps.push({
-        num: parseInt(stepNum),
-        product,
-        role: role || '',
-        tags: tags ? tags.split('|').map(t=>t.trim()) : [],
-        optional: optional === 'TRUE' || optional === 'true' || optional === '1',
-        note: note || ''
-      });
-    }
-  });
-
-  return {
-    am: Object.values(amMap),
-    pm: Object.values(pmMap)
-  };
-}
-
-async function loadFromSheet() {
-  if (SHEET_URL === 'PASTE_YOUR_SHEET_CSV_URL_HERE') {
-    // Use fallback data
-    document.getElementById('last-updated').textContent = 'Edit products in Google Sheets to update this page';
-    renderDays(FALLBACK.am, 'am-content');
-    renderDays(FALLBACK.pm, 'pm-content');
-    return;
-  }
-
-  try {
-    const res = await fetch(SHEET_URL);
-    if (!res.ok) throw new Error('Sheet not found');
-    const text = await res.text();
-    const data = parseCSV(text);
-    document.getElementById('last-updated').textContent = 'Updated from Google Sheets · ' + new Date().toLocaleDateString();
-    renderDays(data.am.length ? data.am : FALLBACK.am, 'am-content');
-    renderDays(data.pm.length ? data.pm : FALLBACK.pm, 'pm-content');
-  } catch(e) {
-    document.getElementById('last-updated').textContent = 'Showing saved routine';
-    renderDays(FALLBACK.am, 'am-content');
-    renderDays(FALLBACK.pm, 'pm-content');
-  }
-}
-
-loadFromSheet();
 </script>
 </body>
 </html>
