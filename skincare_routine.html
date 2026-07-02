@@ -592,43 +592,53 @@ function show(id, e) {
   e.target.classList.add('active');
 }
 
-// Audio context — created on first tap to satisfy iPhone Safari requirement
+// Audio context
 let audioCtx = null;
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
   return audioCtx;
 }
 
 function playDone() {
   try {
     const ctx = getAudioCtx();
-    // Three short ascending beeps
-    const beeps = [
-      { freq: 880, start: 0,   dur: 0.12 },
-      { freq: 1046, start: 0.15, dur: 0.12 },
-      { freq: 1318, start: 0.30, dur: 0.25 }
-    ];
-    beeps.forEach(b => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = b.freq;
-      gain.gain.setValueAtTime(0, ctx.currentTime + b.start);
-      gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + b.start + 0.01);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + b.start + b.dur);
-      osc.start(ctx.currentTime + b.start);
-      osc.stop(ctx.currentTime + b.start + b.dur + 0.05);
-    });
+    // Resume context if suspended (required after page load on Safari)
+    const play = () => {
+      const beeps = [
+        { freq: 880,  start: 0,    dur: 0.15 },
+        { freq: 1046, start: 0.18, dur: 0.15 },
+        { freq: 1318, start: 0.36, dur: 0.28 }
+      ];
+      beeps.forEach(b => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = b.freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + b.start);
+        gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + b.start + 0.02);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + b.start + b.dur);
+        osc.start(ctx.currentTime + b.start);
+        osc.stop(ctx.currentTime + b.start + b.dur + 0.05);
+      });
+    };
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(play);
+    } else {
+      play();
+    }
   } catch(e) {
-    console.log('Audio not supported:', e);
+    console.log('Audio error:', e);
   }
 }
 
 function startTimer(btn, seconds) {
-  // Unlock audio context on tap (iPhone requirement)
-  getAudioCtx();
+  // Create and resume audio context on user tap — required by Safari
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
 
   // If already done, reset
   if (btn.classList.contains('done')) {
