@@ -592,7 +592,44 @@ function show(id, e) {
   e.target.classList.add('active');
 }
 
+// Audio context — created on first tap to satisfy iPhone Safari requirement
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playDone() {
+  try {
+    const ctx = getAudioCtx();
+    // Three short ascending beeps
+    const beeps = [
+      { freq: 880, start: 0,   dur: 0.12 },
+      { freq: 1046, start: 0.15, dur: 0.12 },
+      { freq: 1318, start: 0.30, dur: 0.25 }
+    ];
+    beeps.forEach(b => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = b.freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime + b.start);
+      gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + b.start + 0.01);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + b.start + b.dur);
+      osc.start(ctx.currentTime + b.start);
+      osc.stop(ctx.currentTime + b.start + b.dur + 0.05);
+    });
+  } catch(e) {
+    console.log('Audio not supported:', e);
+  }
+}
+
 function startTimer(btn, seconds) {
+  // Unlock audio context on tap (iPhone requirement)
+  getAudioCtx();
+
   // If already done, reset
   if (btn.classList.contains('done')) {
     btn.classList.remove('done');
@@ -610,7 +647,7 @@ function startTimer(btn, seconds) {
       btn.classList.remove('running');
       btn.classList.add('done');
       btn.textContent = '✓ Done';
-      // Vibrate if supported
+      playDone();
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       return;
     }
