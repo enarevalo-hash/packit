@@ -103,8 +103,8 @@
   </div>
 </header>
 <div class="tabs">
-  <button class="tab active" onclick="show('am',event)">☀️ Morning</button>
-  <button class="tab" onclick="show('pm',event)">🌙 Evening</button>
+  <button class="tab" onclick="show('am',event)">☀️ Morning</button>
+  <button class="tab active" onclick="show('pm',event)">🌙 Evening</button>
 </div>
 <div class="legend">
   <div class="legend-item"><span class="tag tag-ghk">GHK-Cu</span> copper peptide</div>
@@ -112,8 +112,8 @@
   <div class="legend-item"><span class="tag tag-pdrn">PDRN</span> repair cream</div>
   <div class="legend-item"><span class="tag tag-opt">optional</span></div>
 </div>
-<div class="panel active" id="am"></div>
-<div class="panel" id="pm"></div>
+<div class="panel" id="am"></div>
+<div class="panel active" id="pm"></div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz07Mx11K_5oTfOebl6IKikF5LMGIts99VjlI-wNDnNELj6i_eyOc7au5BpXXqKiQha/exec';
@@ -276,10 +276,11 @@ function renderRoutine(products) {
         </div>`;
       }).join('');
 
+      const todayLabel = isToday ? (panel==='am' ? '<span class="today-pill">Today</span>' : '<span class="today-pill">Tonight</span>') : '';
       return `<div class="day-card${isToday?' open today-card':''}" id="card-${day.key}">
         <div class="day-header" onclick="toggle('card-${day.key}')">
           <div class="day-dot ${day.dot}"></div>
-          <div class="day-name">${day.label}${isToday?'<span class="today-pill">Tonight</span>':''}</div>
+          <div class="day-name">${day.label}${todayLabel}</div>
           <div class="day-sub">${day.sub}</div>
           <div class="chevron">▼</div>
         </div>
