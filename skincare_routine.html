@@ -1,25 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skincare Routine</title>
+<link rel="manifest" href="skincare_manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Skincare">
+<meta name="theme-color" content="#f9f7f4">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f7f4; color: #1a1a18; min-height: 100vh; }
-  header { padding: 18px 16px 10px; border-bottom: 1px solid #e8e5e0; }
+  header { padding: 18px 16px 6px; border-bottom: 1px solid #e8e5e0; }
   h1 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
-  .subtitle { font-size: 12px; color: #999; margin-top: 2px; }
+  .header-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .subtitle { font-size: 12px; color: #999; flex: 1; }
+  .sync-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; white-space: nowrap; }
+  .sync-badge.stale { background: #fefce8; color: #854d0e; border-color: #fde68a; }
   .tabs { display: flex; gap: 6px; padding: 12px 16px 0; }
   .tab { padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid #ddd; background: transparent; color: #888; transition: all .15s; }
   .tab.active { background: #1a1a18; border-color: #1a1a18; color: #fff; }
   .panel { display: none; padding: 12px 16px 32px; }
   .panel.active { display: block; }
   .day-card { margin-bottom: 10px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #ece9e4; }
+  .day-card.today-card { border-color: #8b6fbf; box-shadow: 0 0 0 2px #ede9fe; }
   .day-header { padding: 10px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
   .day-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .day-name { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #555; flex: 1; }
   .day-sub { font-size: 11px; color: #bbb; }
+  .today-pill { font-size: 10px; background: #8b6fbf; color: #fff; padding: 1px 7px; border-radius: 20px; margin-left: 4px; }
   .chevron { font-size: 11px; color: #ccc; transition: transform .2s; }
   .day-card.open .chevron { transform: rotate(180deg); }
   .day-body { display: none; border-top: 1px solid #f0ede8; }
@@ -47,10 +58,9 @@
   .tag-c { background: #fef3c7; color: #92400e; }
   .tag-opt { background: #f3f4f6; color: #9ca3af; }
   .tag-ghk { background: #ede9fe; color: #5b21b6; }
-  .tag-egf { background: #fce7f3; color: #9d174d; }
+  .tag-rej { background: #fce7f3; color: #9d174d; }
   .tag-pdrn { background: #d1fae5; color: #065f46; }
   .tag-spf { background: #fef9c3; color: #854d0e; }
-  .tag-rej { background: #fce7f3; color: #9d174d; }
   .legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 4px; }
   .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #999; }
   .dot-sun { background: #f97316; }
@@ -65,17 +75,19 @@
     .tab { border-color: #333; color: #777; }
     .tab.active { background: #e0dfd8; border-color: #e0dfd8; color: #141412; }
     .day-card { background: #1e1e1c; border-color: #2a2a28; }
+    .day-card.today-card { border-color: #8b6fbf; box-shadow: 0 0 0 2px #2e1f5e; }
     .day-body { border-color: #2a2a28; }
     .toner-block { background: #181816; border-color: #2a2a28; }
     .step { border-color: #252523; }
     .step-product { color: #e0dfd8; }
+    .sync-badge { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
+    .sync-badge.stale { background: #3d2e0a; color: #fbbf24; border-color: #92400e; }
     .tag-c { background: #3d2e0a; color: #fbbf24; }
     .tag-opt { background: #252523; color: #666; }
     .tag-ghk { background: #2e1f5e; color: #c4b5fd; }
-    .tag-egf { background: #4a0e2a; color: #f9a8d4; }
+    .tag-rej { background: #4a0e2a; color: #f9a8d4; }
     .tag-pdrn { background: #064e3b; color: #6ee7b7; }
     .tag-spf { background: #3d3000; color: #fde68a; }
-    .tag-rej { background: #4a0e2a; color: #f9a8d4; }
     .timer-btn { border-color: #a78bda; color: #a78bda; }
     .timer-btn.running { background: #6d4fa0; color: #fff; border-color: #6d4fa0; }
     .timer-btn.done { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
@@ -85,7 +97,10 @@
 <body>
 <header>
   <h1>Skincare Routine</h1>
-  <div class="subtitle" id="status">Loading…</div>
+  <div class="header-meta">
+    <div class="subtitle" id="status">Loading…</div>
+    <div class="sync-badge" id="sync-badge" style="display:none"></div>
+  </div>
 </header>
 <div class="tabs">
   <button class="tab active" onclick="show('am',event)">☀️ Morning</button>
@@ -102,10 +117,22 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz07Mx11K_5oTfOebl6IKikF5LMGIts99VjlI-wNDnNELj6i_eyOc7au5BpXXqKiQha/exec';
+const CACHE_KEY = 'skincare_products_v2';
+const CACHE_TIME_KEY = 'skincare_sync_time_v2';
+const TIMER_KEY = 'skincare_timers_v2';
 
+// ── TODAY DETECTION ───────────────────────────
+function getTodayCard() {
+  const day = new Date().getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  const pmMap = { 0:'sunday', 1:'retinal', 2:'exfoliant', 3:'retinal', 4:'exfoliant', 5:'retinal', 6:'saturday' };
+  const amMap = { 0:'am-a', 1:'am-a', 2:'am-b', 3:'am-a', 4:'am-b', 5:'am-a', 6:'am-b' };
+  return { pm: pmMap[day], am: amMap[day] };
+}
+
+// ── ROUTINE STRUCTURE ─────────────────────────
 const ROUTINE = {
   pm: [
-    { key:'sunday', label:'Sunday', sub:'Peel night', dot:'dot-sun', open:true,
+    { key:'sunday', label:'Sunday', sub:'Peel night', dot:'dot-sun',
       toners: [
         { name:'Isntree HA Toner Blue' },
         { name:'Etude Soon Jung 5.5' },
@@ -122,7 +149,7 @@ const ROUTINE = {
         { num:8, key:'sunday-8', notes:'3-4 drops · press over Skinfix', optional:true }
       ]
     },
-    { key:'retinal', label:'Mon / Wed / Fri', sub:'Retinal nights', dot:'dot-ret', open:false,
+    { key:'retinal', label:'Mon / Wed / Fri', sub:'Retinal nights', dot:'dot-ret',
       toners: [
         { name:'Isntree HA Toner Blue' },
         { name:'Etude Soon Jung 5.5' },
@@ -137,7 +164,7 @@ const ROUTINE = {
         { num:6, key:'retinal-6', notes:'3-4 drops · especially good if skin feels dry', optional:true }
       ]
     },
-    { key:'exfoliant', label:'Tue / Thu', sub:'Exfoliant nights', dot:'dot-exf', open:false,
+    { key:'exfoliant', label:'Tue / Thu', sub:'Exfoliant nights', dot:'dot-exf',
       toners: [
         { name:'Isntree HA Toner Blue' },
         { name:'Etude Soon Jung 5.5' },
@@ -154,7 +181,7 @@ const ROUTINE = {
         { num:8, key:'exfoliant-8', notes:'Pea size · seal everything in' }
       ]
     },
-    { key:'saturday', label:'Saturday', sub:'Recovery night', dot:'dot-sat', open:false,
+    { key:'saturday', label:'Saturday', sub:'Recovery night', dot:'dot-sat',
       toners: [
         { name:'Isntree HA Toner Blue' },
         { name:'Etude Soon Jung 5.5' },
@@ -169,12 +196,12 @@ const ROUTINE = {
         { num:6, key:'saturday-6', notes:'Rice grain per eye · tap gently' },
         { num:7, key:'saturday-7', notes:'Pea size · warm and press in' },
         { num:8, key:'saturday-8', notes:'Pea size · seal everything in' },
-        { num:9, key:'saturday-9', notes:'3-4 drops · press over Skinfix · best recovery night treat', optional:true }
+        { num:9, key:'saturday-9', notes:'3-4 drops · press over Skinfix', optional:true }
       ]
     }
   ],
   am: [
-    { key:'am-a', label:'Day A — Mon / Wed / Fri / Sun', sub:'Vitamin C', dot:'dot-am-a', open:true,
+    { key:'am-a', label:'Day A — Mon / Wed / Fri / Sun', sub:'Vitamin C', dot:'dot-am-a',
       toners: [
         { name:'Etude Soon Jung 5.5' },
         { name:'Peach & Lily Wild Dew Essence' },
@@ -186,7 +213,7 @@ const ROUTINE = {
         { num:3, key:'am-a-3', notes:'Always last · generous application · swap Tatch Milky' }
       ]
     },
-    { key:'am-b', label:'Day B — Tue / Thu / Sat', sub:'Copper peptide', dot:'dot-am-b', open:false,
+    { key:'am-b', label:'Day B — Tue / Thu / Sat', sub:'Copper peptide', dot:'dot-am-b',
       toners: [
         { name:'Etude Soon Jung 5.5' },
         { name:'Peach & Lily Wild Dew Essence' },
@@ -201,6 +228,7 @@ const ROUTINE = {
   ]
 };
 
+// ── TAGS ─────────────────────────────────────
 function getTags(name) {
   const n = name.toLowerCase();
   const tags = [];
@@ -211,7 +239,6 @@ function getTags(name) {
   if (n.includes('spf') || n.includes('aquafresh') || n.includes('tatch') || n.includes('milky')) tags.push('spf');
   return tags;
 }
-
 function tagHTML(name) {
   return getTags(name).map(t => {
     if (t==='c')    return '<span class="tag tag-c">Vitamin C</span>';
@@ -223,9 +250,12 @@ function tagHTML(name) {
   }).join('');
 }
 
+// ── RENDER ────────────────────────────────────
 function renderRoutine(products) {
+  const today = getTodayCard();
   ['pm','am'].forEach(panel => {
     document.getElementById(panel).innerHTML = ROUTINE[panel].map(day => {
+      const isToday = today[panel] === day.key;
       const tonerRows = day.toners.map((t,i) => {
         const warn = t.warn ? `<span class="toner-warn-${t.warn}">${t.warn==='skip'?'⚠':'✓'} ${t.warnText}</span>` : '';
         return `<div class="toner-row">${i===0?'<span style="width:14px;display:inline-block"></span>':'<span class="toner-arrow">→</span>'}<span>${t.name}</span>${warn}</div>`;
@@ -234,7 +264,8 @@ function renderRoutine(products) {
       const stepRows = day.steps.map(s => {
         const name = products[s.key] || s.key;
         const waitBtn = s.waitBtn || 'Start';
-        const waitRow = s.wait ? `<div class="wait-row"><span class="wait-label">⏱ ${s.waitLabel}</span><button class="timer-btn" onclick="startTimer(this,${s.wait},'${waitBtn}')">▶ ${waitBtn}</button></div>` : '';
+        const timerId = `timer-${s.key}`;
+        const waitRow = s.wait ? `<div class="wait-row"><span class="wait-label">⏱ ${s.waitLabel}</span><button class="timer-btn" id="${timerId}" onclick="startTimer(this,${s.wait},'${waitBtn}','${s.key}')">▶ ${waitBtn}</button></div>` : '';
         return `<div class="step${s.optional?' optional':''}">
           <div class="step-num">${s.num}</div>
           <div class="step-info">
@@ -245,10 +276,10 @@ function renderRoutine(products) {
         </div>`;
       }).join('');
 
-      return `<div class="day-card${day.open?' open':''}" id="card-${day.key}">
+      return `<div class="day-card${isToday?' open today-card':''}" id="card-${day.key}">
         <div class="day-header" onclick="toggle('card-${day.key}')">
           <div class="day-dot ${day.dot}"></div>
-          <div class="day-name">${day.label}</div>
+          <div class="day-name">${day.label}${isToday?'<span class="today-pill">Tonight</span>':''}</div>
           <div class="day-sub">${day.sub}</div>
           <div class="chevron">▼</div>
         </div>
@@ -259,39 +290,176 @@ function renderRoutine(products) {
       </div>`;
     }).join('');
   });
+  restoreTimers();
 }
 
+// ── SYNC BADGE ────────────────────────────────
+function updateSyncBadge(live) {
+  const badge = document.getElementById('sync-badge');
+  const timeStr = localStorage.getItem(CACHE_TIME_KEY);
+  if (!timeStr) { badge.style.display='none'; return; }
+  const mins = Math.round((Date.now() - parseInt(timeStr)) / 60000);
+  const label = mins < 1 ? 'Synced just now' : mins < 60 ? `Synced ${mins}m ago` : 'Synced ' + new Date(parseInt(timeStr)).toLocaleDateString();
+  badge.textContent = label;
+  badge.className = 'sync-badge' + (live ? '' : ' stale');
+  badge.style.display = 'block';
+}
+
+// ── LOAD ROUTINE ──────────────────────────────
 async function loadRoutine() {
-  const defaults = {};
-  ['pm','am'].forEach(panel => {
-    ROUTINE[panel].forEach(day => {
-      day.steps.forEach(s => { defaults[s.key] = s.key; });
-    });
-  });
+  // Show cached data instantly if available
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      renderRoutine(JSON.parse(cached));
+      document.getElementById('status').textContent = 'Skincare Routine';
+      updateSyncBadge(false);
+    } catch(e) {}
+  }
+
+  // Fetch fresh data in background
   try {
     const res = await fetch(SCRIPT_URL);
     if (!res.ok) throw new Error('failed');
     const rows = await res.json();
-    const products = {...defaults};
+    const products = {};
     rows.forEach(r => {
       const key = String(r.Day||'').trim().toLowerCase();
       const name = String(r.Product||'').trim();
       if (key && name) products[key] = name;
     });
+    localStorage.setItem(CACHE_KEY, JSON.stringify(products));
+    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
     renderRoutine(products);
-    document.getElementById('status').textContent = 'Live from Google Sheets · ' + new Date().toLocaleDateString();
+    document.getElementById('status').textContent = 'Skincare Routine';
+    updateSyncBadge(true);
   } catch(e) {
-    renderRoutine(defaults);
-    document.getElementById('status').textContent = 'Showing saved routine';
+    if (!cached) {
+      document.getElementById('status').textContent = 'No connection — showing saved routine';
+    }
   }
 }
 
-let audioCtx=null;
-function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
-function playDone(){try{const ctx=getAudioCtx();const play=()=>{[{freq:880,start:0,dur:.15},{freq:1046,start:.18,dur:.15},{freq:1318,start:.36,dur:.28}].forEach(b=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';osc.frequency.value=b.freq;gain.gain.setValueAtTime(0,ctx.currentTime+b.start);gain.gain.linearRampToValueAtTime(0.5,ctx.currentTime+b.start+.02);gain.gain.linearRampToValueAtTime(0,ctx.currentTime+b.start+b.dur);osc.start(ctx.currentTime+b.start);osc.stop(ctx.currentTime+b.start+b.dur+.05);});};ctx.state==='suspended'?ctx.resume().then(play):play();}catch(e){}}
-function startTimer(btn,seconds,btnLabel){const ctx=getAudioCtx();if(ctx.state==='suspended')ctx.resume();if(btn.classList.contains('done')){btn.classList.remove('done');btn.textContent='▶ '+btnLabel;return;}if(btn.classList.contains('running'))return;btn.classList.add('running');let remaining=seconds;function tick(){if(remaining<=0){btn.classList.remove('running');btn.classList.add('done');btn.textContent='✓ Done';playDone();if(navigator.vibrate)navigator.vibrate([200,100,200]);return;}const m=Math.floor(remaining/60),s=remaining%60;btn.textContent=m>0?`${m}:${s.toString().padStart(2,'0')}`:`${s}s`;remaining--;setTimeout(tick,1000);}tick();}
-function toggle(id){document.getElementById(id).classList.toggle('open');}
-function show(id,e){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');e.target.classList.add('active');}
+// ── TIMER PERSISTENCE ─────────────────────────
+function saveTimerState(key, endTime, done) {
+  const timers = JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
+  if (done) { delete timers[key]; }
+  else { timers[key] = endTime; }
+  localStorage.setItem(TIMER_KEY, JSON.stringify(timers));
+}
+
+function restoreTimers() {
+  const timers = JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
+  Object.entries(timers).forEach(([key, endTime]) => {
+    const remaining = Math.round((endTime - Date.now()) / 1000);
+    const btn = document.getElementById(`timer-${key}`);
+    if (!btn) return;
+    if (remaining <= 0) {
+      btn.classList.add('done');
+      btn.textContent = '✓ Done';
+      saveTimerState(key, 0, true);
+    } else {
+      const label = btn.textContent.replace('▶ ','');
+      runTimer(btn, remaining, endTime, label, key);
+    }
+  });
+}
+
+// ── WAKE LOCK ─────────────────────────────────
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
+}
+
+// Re-acquire wake lock if page becomes visible again
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible') {
+    const timers = JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
+    if (Object.keys(timers).length > 0) await requestWakeLock();
+  }
+});
+
+// ── AUDIO ─────────────────────────────────────
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playDone() {
+  try {
+    const ctx = getAudioCtx();
+    const play = () => {
+      [{freq:880,start:0,dur:.15},{freq:1046,start:.18,dur:.15},{freq:1318,start:.36,dur:.28}].forEach(b => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = b.freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime+b.start);
+        gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime+b.start+.02);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime+b.start+b.dur);
+        osc.start(ctx.currentTime+b.start);
+        osc.stop(ctx.currentTime+b.start+b.dur+.05);
+      });
+    };
+    ctx.state === 'suspended' ? ctx.resume().then(play) : play();
+  } catch(e) {}
+}
+
+// ── TIMER ─────────────────────────────────────
+function startTimer(btn, seconds, btnLabel, key) {
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  if (btn.classList.contains('done')) {
+    btn.classList.remove('done');
+    btn.textContent = '▶ ' + btnLabel;
+    saveTimerState(key, 0, true);
+    return;
+  }
+  if (btn.classList.contains('running')) return;
+  requestWakeLock();
+  const endTime = Date.now() + (seconds * 1000);
+  saveTimerState(key, endTime, false);
+  runTimer(btn, seconds, endTime, btnLabel, key);
+}
+
+function runTimer(btn, initialRemaining, endTime, btnLabel, key) {
+  btn.classList.add('running');
+  function tick() {
+    const remaining = Math.round((endTime - Date.now()) / 1000);
+    if (remaining <= 0) {
+      btn.classList.remove('running');
+      btn.classList.add('done');
+      btn.textContent = '✓ Done';
+      playDone();
+      if (navigator.vibrate) navigator.vibrate([200,100,200]);
+      saveTimerState(key, 0, true);
+      // Check if any timers still running
+      const timers = JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
+      if (Object.keys(timers).length === 0) releaseWakeLock();
+      return;
+    }
+    const m = Math.floor(remaining/60), s = remaining%60;
+    btn.textContent = m > 0 ? `${m}:${s.toString().padStart(2,'0')}` : `${s}s`;
+    setTimeout(tick, 500);
+  }
+  tick();
+}
+
+// ── UI ────────────────────────────────────────
+function toggle(id) { document.getElementById(id).classList.toggle('open'); }
+function show(id, e) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.target.classList.add('active');
+}
+
 loadRoutine();
 </script>
 </body>
