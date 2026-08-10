@@ -40,6 +40,7 @@
   .toner-arrow { color: #ddd; font-size: 10px; }
   .toner-warn-skip { font-size: 10px; color: #e8876a; font-weight: 500; margin-left: 4px; }
   .toner-warn-keep { font-size: 10px; color: #10b981; font-weight: 500; margin-left: 4px; }
+  .toner-note { font-size: 10px; color: #8b6fbf; font-weight: 500; margin-left: 4px; }
   .steps { padding: 8px 14px; }
   .step { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f5f2ee; }
   .step:last-child { border-bottom: none; }
@@ -58,6 +59,7 @@
   .tag-opt { background: #f3f4f6; color: #9ca3af; }
   .tag-ghk { background: #ede9fe; color: #5b21b6; }
   .tag-rej { background: #fce7f3; color: #9d174d; }
+  .tag-egf { background: #fce7f3; color: #9d174d; }
   .tag-pdrn { background: #d1fae5; color: #065f46; }
   .tag-spf { background: #fef9c3; color: #854d0e; }
   .legend { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 4px; }
@@ -85,6 +87,7 @@
     .tag-opt { background: #252523; color: #666; }
     .tag-ghk { background: #2e1f5e; color: #c4b5fd; }
     .tag-rej { background: #4a0e2a; color: #f9a8d4; }
+    .tag-egf { background: #4a0e2a; color: #f9a8d4; }
     .tag-pdrn { background: #064e3b; color: #6ee7b7; }
     .tag-spf { background: #3d3000; color: #fde68a; }
     .timer-btn { border-color: #a78bda; color: #a78bda; }
@@ -107,6 +110,7 @@
 </div>
 <div class="legend">
   <div class="legend-item"><span class="tag tag-ghk">GHK-Cu</span> copper peptide</div>
+  <div class="legend-item"><span class="tag tag-egf">EGF</span> growth factor</div>
   <div class="legend-item"><span class="tag tag-rej">Rejuran</span> PDRN + EGF</div>
   <div class="legend-item"><span class="tag tag-pdrn">PDRN</span> repair cream</div>
   <div class="legend-item"><span class="tag tag-opt">optional</span></div>
@@ -116,9 +120,9 @@
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz07Mx11K_5oTfOebl6IKikF5LMGIts99VjlI-wNDnNELj6i_eyOc7au5BpXXqKiQha/exec';
-const CACHE_KEY = 'skincare_products_v3';
-const CACHE_TIME_KEY = 'skincare_sync_time_v3';
-const TIMER_KEY = 'skincare_timers_v3';
+const CACHE_KEY = 'skincare_products_v4';
+const CACHE_TIME_KEY = 'skincare_sync_time_v4';
+const TIMER_KEY = 'skincare_timers_v4';
 
 function getTodayCard() {
   const day = new Date().getDay();
@@ -129,7 +133,9 @@ function getTodayCard() {
 
 const ROUTINE = {
   pm: [
-    { key:'sunday', label:'Sunday', sub:'Peel night', dot:'dot-sun',
+    {
+      key:'sunday', label:'Sunday', sub:'Peel night', dot:'dot-sun',
+      tonerNote: 'after peel pads',
       toners: [
         { name:'Genabelle PDRN Rejuvenating Toner' },
         { name:'Etude Soon Jung 5.5' },
@@ -137,15 +143,18 @@ const ROUTINE = {
       ],
       steps: [
         { num:1, key:'sunday-1', notes:'Swipe once · do not rinse', wait:120, waitLabel:'Wait 2 min' },
-        { num:2, key:'sunday-2', notes:'2-3 sprays · hold 6-8 inches · pat in', optional:true },
-        { num:3, key:'sunday-3', notes:'2-3 pumps · pat into skin' },
-        { num:4, key:'sunday-4', notes:'Rice grain per eye · tap gently' },
-        { num:5, key:'sunday-5', notes:'Pea size · warm and press in' },
-        { num:6, key:'sunday-6', notes:'Pea size · seal everything in' },
-        { num:7, key:'sunday-7', notes:'3-4 drops · press over Skinfix', optional:true }
+        { num:2, key:'sunday-t', toner:true, notes:'Toners here — see above' },
+        { num:3, key:'sunday-2', notes:'2-3 sprays · hold 6-8 inches · pat in' },
+        { num:4, key:'sunday-3', notes:'2-3 pumps · pat into skin', optional:true },
+        { num:5, key:'sunday-4', notes:'2-3 drops · press gently', wait:60, waitLabel:'Wait 60 sec' },
+        { num:6, key:'sunday-5', notes:'Rice grain per eye · tap gently' },
+        { num:7, key:'sunday-6', notes:'Pea size · warm and press in' },
+        { num:8, key:'sunday-7', notes:'Quarter size · final seal' }
       ]
     },
-    { key:'retinal', label:'Mon / Wed / Fri', sub:'Retinal nights', dot:'dot-ret',
+    {
+      key:'retinal', label:'Mon / Wed / Fri', sub:'Retinal nights', dot:'dot-ret',
+      tonerNote: 'before retinal',
       toners: [
         { name:'Genabelle PDRN Rejuvenating Toner' },
         { name:'Etude Soon Jung 5.5' },
@@ -156,11 +165,12 @@ const ROUTINE = {
         { num:2, key:'retinal-2', notes:'2-3 pumps · pat into skin', optional:true },
         { num:3, key:'retinal-3', notes:'2-3 drops · press gently · PDRN + EGF repair', wait:60, waitLabel:'Wait 60 sec' },
         { num:4, key:'retinal-4', notes:'Rice grain per eye · tap gently' },
-        { num:5, key:'retinal-5', notes:'Pea size · seal everything in' },
-        { num:6, key:'retinal-6', notes:'3-4 drops · especially good if skin feels dry', optional:true }
+        { num:5, key:'retinal-5', notes:'Quarter size · final seal' }
       ]
     },
-    { key:'exfoliant', label:'Tue / Thu', sub:'Exfoliant nights', dot:'dot-exf',
+    {
+      key:'exfoliant', label:'Tue / Thu', sub:'Exfoliant nights', dot:'dot-exf',
+      tonerNote: 'before Good Genes · after Microfoliant',
       toners: [
         { name:'Genabelle PDRN Rejuvenating Toner' },
         { name:'Etude Soon Jung 5.5' },
@@ -168,14 +178,18 @@ const ROUTINE = {
       ],
       steps: [
         { num:1, key:'exfoliant-1', notes:'1 full pump · spread evenly', wait:180, waitLabel:'Wait 3-5 min', waitBtn:'Start (3 min)' },
-        { num:2, key:'exfoliant-2', notes:'Use instead of Good Genes if preferred · activate with water · rinse well', optional:true },
-        { num:3, key:'exfoliant-3', notes:'2-3 pumps · pat into skin' },
-        { num:4, key:'exfoliant-4', notes:'Rice grain per eye · tap gently' },
-        { num:5, key:'exfoliant-5', notes:'Pea size · warm and press in' },
-        { num:6, key:'exfoliant-6', notes:'Pea size · seal everything in' }
+        { num:2, key:'exfoliant-2', notes:'Use instead of Good Genes · activate with water · rinse well · then do toners', optional:true },
+        { num:3, key:'exfoliant-3', notes:'2-3 sprays · hold 6-8 inches · pat in' },
+        { num:4, key:'exfoliant-4', notes:'2-3 pumps · pat into skin', optional:true },
+        { num:5, key:'exfoliant-5', notes:'2-3 drops · press gently', wait:60, waitLabel:'Wait 60 sec' },
+        { num:6, key:'exfoliant-6', notes:'Rice grain per eye · tap gently' },
+        { num:7, key:'exfoliant-7', notes:'Pea size · warm and press in' },
+        { num:8, key:'exfoliant-8', notes:'Quarter size · final seal' }
       ]
     },
-    { key:'saturday', label:'Saturday', sub:'Recovery night', dot:'dot-sat',
+    {
+      key:'saturday', label:'Saturday', sub:'Recovery night', dot:'dot-sat',
+      tonerNote: 'before treatments',
       toners: [
         { name:'Genabelle PDRN Rejuvenating Toner' },
         { name:'Etude Soon Jung 5.5' },
@@ -184,16 +198,17 @@ const ROUTINE = {
       steps: [
         { num:1, key:'saturday-1', notes:'2-3 sprays · hold 6-8 inches · pat in', optional:true },
         { num:2, key:'saturday-2', notes:'2-3 pumps · pat into skin', optional:true },
-        { num:3, key:'saturday-3', notes:'2-3 drops · press gently · PDRN + EGF repair', wait:60, waitLabel:'Wait 60 sec' },
-        { num:4, key:'saturday-4', notes:'Rice grain per eye · tap gently' },
-        { num:5, key:'saturday-5', notes:'Pea size · warm and press in' },
-        { num:6, key:'saturday-6', notes:'Pea size · seal everything in' },
-        { num:7, key:'saturday-7', notes:'3-4 drops · press over Skinfix · best recovery night treat', optional:true }
+        { num:3, key:'saturday-3', notes:'2-3 drops · press gently', wait:60, waitLabel:'Wait 60 sec' },
+        { num:4, key:'saturday-4', notes:'2-3 drops · press gently · PDRN + EGF repair', wait:60, waitLabel:'Wait 60 sec' },
+        { num:5, key:'saturday-5', notes:'Rice grain per eye · tap gently' },
+        { num:6, key:'saturday-6', notes:'Pea size · warm and press in' },
+        { num:7, key:'saturday-7', notes:'Quarter size · final seal' }
       ]
     }
   ],
   am: [
-    { key:'am-a', label:'Day A — Mon / Wed / Fri / Sun', sub:'Vitamin C', dot:'dot-am-a',
+    {
+      key:'am-a', label:'Day A — Mon / Wed / Fri / Sun', sub:'Vitamin C', dot:'dot-am-a',
       toners: [
         { name:'Etude Soon Jung 5.5' },
         { name:'Peach & Lily Wild Dew Essence' },
@@ -205,7 +220,8 @@ const ROUTINE = {
         { num:3, key:'am-a-3', notes:'Always last · generous application · swap Tatch Milky' }
       ]
     },
-    { key:'am-b', label:'Day B — Tue / Thu / Sat', sub:'Copper peptide', dot:'dot-am-b',
+    {
+      key:'am-b', label:'Day B — Tue / Thu / Sat', sub:'Copper peptide', dot:'dot-am-b',
       toners: [
         { name:'Etude Soon Jung 5.5' },
         { name:'Peach & Lily Wild Dew Essence' },
@@ -225,6 +241,7 @@ function getTags(name) {
   const tags = [];
   if (n.includes('golden hour') || n.includes('vitamin c')) tags.push('c');
   if (n.includes('ghk') || n.includes('copper')) tags.push('ghk');
+  if (n.includes('egf') && !n.includes('rejuran')) tags.push('egf');
   if (n.includes('rejuran') || n.includes('dual')) tags.push('rej');
   if ((n.includes('pdrn') || n.includes('rejuvenating')) && (n.includes('cream') || n.includes('max'))) tags.push('pdrn');
   if (n.includes('spf') || n.includes('aquafresh') || n.includes('tatch') || n.includes('milky')) tags.push('spf');
@@ -235,6 +252,7 @@ function tagHTML(name) {
   return getTags(name).map(t => {
     if (t==='c')    return '<span class="tag tag-c">Vitamin C</span>';
     if (t==='ghk')  return '<span class="tag tag-ghk">GHK-Cu</span>';
+    if (t==='egf')  return '<span class="tag tag-egf">EGF</span>';
     if (t==='rej')  return '<span class="tag tag-rej">Rejuran</span>';
     if (t==='pdrn') return '<span class="tag tag-pdrn">PDRN</span>';
     if (t==='spf')  return '<span class="tag tag-spf">SPF</span>';
@@ -248,11 +266,14 @@ function renderRoutine(products) {
     document.getElementById(panel).innerHTML = ROUTINE[panel].map(day => {
       const isToday = today[panel] === day.key;
       const todayLabel = isToday ? (panel==='am' ? '<span class="today-pill">Today</span>' : '<span class="today-pill">Tonight</span>') : '';
+
+      const tonerNote = day.tonerNote ? `<span class="toner-note">↑ ${day.tonerNote}</span>` : '';
       const tonerRows = day.toners.map((t,i) => {
         const warn = t.warn ? `<span class="toner-warn-${t.warn}">${t.warn==='skip'?'⚠':'✓'} ${t.warnText}</span>` : '';
         return `<div class="toner-row">${i===0?'<span style="width:14px;display:inline-block"></span>':'<span class="toner-arrow">→</span>'}<span>${t.name}</span>${warn}</div>`;
       }).join('');
-      const stepRows = day.steps.map(s => {
+
+      const stepRows = day.steps.filter(s => !s.toner).map(s => {
         const name = products[s.key] || s.key;
         const waitBtn = s.waitBtn || 'Start';
         const timerId = `timer-${s.key}`;
@@ -266,6 +287,7 @@ function renderRoutine(products) {
           </div>
         </div>`;
       }).join('');
+
       return `<div class="day-card${isToday?' open today-card':''}" id="card-${day.key}">
         <div class="day-header" onclick="toggle('card-${day.key}')">
           <div class="day-dot ${day.dot}"></div>
@@ -274,7 +296,7 @@ function renderRoutine(products) {
           <div class="chevron">▼</div>
         </div>
         <div class="day-body">
-          <div class="toner-block"><div class="toner-label">Toners</div>${tonerRows}</div>
+          <div class="toner-block"><div class="toner-label">Toners ${tonerNote}</div>${tonerRows}</div>
           <div class="steps">${stepRows}</div>
         </div>
       </div>`;
