@@ -276,3 +276,33 @@ async function loadRoutine() {
   if (cached) {
     try {
       renderRoutine(buildModel(JSON.parse(cached)));
+      document.getElementById('status').textContent='Skincare Routine';
+      updateSyncBadge(false);
+    } catch(e) {}
+  }
+  try {
+    const res = await fetch(SCRIPT_URL);
+    if (!res.ok) throw new Error('failed');
+    const data = await res.json();
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+    renderRoutine(buildModel(data));
+    document.getElementById('status').textContent = 'Skincare Routine';
+    updateSyncBadge(true);
+  } catch(e) {
+    if (!cached) { document.getElementById('status').textContent='Could not load routine'; }
+  }
+}
+
+function toggle(id) { document.getElementById(id).classList.toggle('open'); }
+function show(id, e) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.target.classList.add('active');
+}
+
+loadRoutine();
+</script>
+</body>
+</html>
